@@ -1,0 +1,208 @@
+package service
+
+import (
+	"cmd/api/internal/domain"
+	"cmd/api/internal/repository"
+	"errors"
+	"fmt"
+
+	"github.com/go-playground/validator/v10"
+)
+
+type VoucherService struct {
+	repository         repository.VoucherRepository
+	lineItemRepository repository.LineItemRepository
+	validate           *validator.Validate
+}
+
+func NewVoucherService(repo repository.VoucherRepository, lineItemRepo repository.LineItemRepository) *VoucherService {
+	return &VoucherService{
+		repository:         repo,
+		lineItemRepository: lineItemRepo,
+		validate:           validator.New(),
+	}
+}
+
+// CreateVoucher creates a new voucher
+func (s *VoucherService) CreateVoucher(voucher *domain.Voucher) error {
+	// Validate input
+	if err := s.validate.Struct(voucher); err != nil {
+		return fmt.Errorf("validation failed: %w", err)
+	}
+
+	// Validate description
+	if voucher.Description == "" {
+		return errors.New("description is required")
+	}
+
+	// Validate period format (e.g., "2025-01")
+	if len(voucher.Period) != 7 {
+		return errors.New("period must be in format YYYY-MM (e.g., '2025-01')")
+	}
+
+	// Validate created by
+	if voucher.CreatedBy <= 0 {
+		return errors.New("invalid user ID")
+	}
+
+	// Create voucher
+	err := s.repository.CreateVoucher(voucher)
+	if err != nil {
+		return fmt.Errorf("failed to create voucher: %w", err)
+	}
+
+	return nil
+}
+
+// GetVoucherByID retrieves a voucher by ID, including its line items
+func (s *VoucherService) GetVoucherByID(voucherID int) (*domain.Voucher, error) {
+	if voucherID <= 0 {
+		return nil, errors.New("invalid voucher ID")
+	}
+
+	voucher, err := s.repository.GetVoucherByID(voucherID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get voucher: %w", err)
+	}
+
+	// Get line items for this voucher
+	lineItems, err := s.lineItemRepository.GetLineItemsByVoucherID(voucherID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get line items: %w", err)
+	}
+
+	// Convert []*LineItem to []LineItem
+	voucher.Lines = make([]domain.LineItem, len(lineItems))
+	for i, item := range lineItems {
+		voucher.Lines[i] = *item
+	}
+
+	return voucher, nil
+}
+
+// GetAllVouchers retrieves all vouchers
+func (s *VoucherService) GetAllVouchers() ([]*domain.Voucher, error) {
+	vouchers, err := s.repository.GetAllVouchers()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get vouchers: %w", err)
+	}
+
+	return vouchers, nil
+}
+
+// GetVouchersByPeriod retrieves vouchers by period
+func (s *VoucherService) GetVouchersByPeriod(period string) ([]*domain.Voucher, error) {
+	if len(period) != 7 {
+		return nil, errors.New("period must be in format YYYY-MM (e.g., '2025-01')")
+	}
+
+	vouchers, err := s.repository.GetVouchersByPeriod(period)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get vouchers by period: %w", err)
+	}
+
+	return vouchers, nil
+}
+
+// GetVouchersByCreatedBy retrieves vouchers by user
+func (s *VoucherService) GetVouchersByCreatedBy(userID int) ([]*domain.Voucher, error) {
+	if userID <= 0 {
+		return nil, errors.New("invalid user ID")
+	}
+
+	vouchers, err := s.repository.GetVouchersByCreatedBy(userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get vouchers by user: %w", err)
+	}
+
+	return vouchers, nil
+}
+
+// UpdateVoucher updates an existing voucher
+func (s *VoucherService) UpdateVoucher(voucher *domain.Voucher) error {
+	// Validate input
+	if err := s.validate.Struct(voucher); err != nil {
+		return fmt.Errorf("validation failed: %w", err)
+	}
+
+	// Check if voucher exists
+	existingVoucher, err := s.repository.GetVoucherByID(voucher.VoucherID)
+	if err != nil {
+		return fmt.Errorf("voucher not found: %w", err)
+	}
+	if existingVoucher == nil {
+		return errors.New("voucher not found")
+	}
+
+	// Validate description
+	if voucher.Description == "" {
+		return errors.New("description is required")
+	}
+
+	// Validate period format
+	if len(voucher.Period) != 7 {
+		return errors.New("period must be in format YYYY-MM (e.g., '2025-01')")
+	}
+
+	// Validate created by
+	if voucher.CreatedBy <= 0 {
+		return errors.New("invalid user ID")
+	}
+
+	// Update voucher
+	err = s.repository.UpdateVoucher(voucher)
+	if err != nil {
+		return fmt.Errorf("failed to update voucher: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteVoucher deletes a voucher by ID (also deletes associated line items)
+func (s *VoucherService) DeleteVoucher(voucherID int) error {
+	if voucherID <= 0 {
+		return errors.New("invalid voucher ID")
+	}
+
+	// Check if voucher exists
+	existingVoucher, err := s.repository.GetVoucherByID(voucherID)
+	if err != nil {
+		return fmt.Errorf("voucher not found: %w", err)
+	}
+	if existingVoucher == nil {
+		return errors.New("voucher not found")
+	}
+
+	// Delete associated line items first
+	err = s.lineItemRepository.DeleteLineItemsByVoucherID(voucherID)
+	if err != nil {
+		return fmt.Errorf("failed to delete line items: %w", err)
+	}
+
+	// Delete voucher
+	err = s.repository.DeleteVoucher(voucherID)
+	if err != nil {
+		return fmt.Errorf("failed to delete voucher: %w", err)
+	}
+
+	return nil
+}
+
+// ValidateVoucherBalance validates that debit and credit balance for a voucher
+func (s *VoucherService) ValidateVoucherBalance(voucherID int) (bool, error) {
+	lineItems, err := s.lineItemRepository.GetLineItemsByVoucherID(voucherID)
+	if err != nil {
+		return false, fmt.Errorf("failed to get line items: %w", err)
+	}
+
+	var totalDebit, totalCredit float64
+	for _, item := range lineItems {
+		totalDebit += item.DebitAmount
+		totalCredit += item.CreditAmount
+	}
+
+	// Check if debit equals credit (with small tolerance for floating point)
+	balanced := (totalDebit - totalCredit) < 0.01 && (totalDebit - totalCredit) > -0.01
+
+	return balanced, nil
+}

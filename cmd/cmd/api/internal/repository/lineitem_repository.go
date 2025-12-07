@@ -1,0 +1,192 @@
+package repository
+
+import (
+	"cmd/api/internal/domain"
+	"database/sql"
+	"fmt"
+)
+
+type LineItemRepository interface {
+	CreateLineItem(lineItem *domain.LineItem) error
+	GetLineItemByID(lineID int) (*domain.LineItem, error)
+	GetLineItemsByVoucherID(voucherID int) ([]*domain.LineItem, error)
+	GetLineItemsByAccountNo(accountNo int) ([]*domain.LineItem, error)
+	UpdateLineItem(lineItem *domain.LineItem) error
+	DeleteLineItem(lineID int) error
+	DeleteLineItemsByVoucherID(voucherID int) error
+}
+
+type lineItemRepository struct {
+	db *sql.DB
+}
+
+func NewLineItemRepository(db *sql.DB) LineItemRepository {
+	return &lineItemRepository{db: db}
+}
+
+func (r *lineItemRepository) CreateLineItem(lineItem *domain.LineItem) error {
+	query := `
+		INSERT INTO line_items (voucher_id, account_no, debit_amount, credit_amount, tax_code, project_id, cost_center_id)
+		VALUES (?, ?, ?, ?, ?, ?, ?)
+	`
+	result, err := r.db.Exec(query,
+		lineItem.VoucherID,
+		lineItem.AccountNo,
+		lineItem.DebitAmount,
+		lineItem.CreditAmount,
+		lineItem.TaxCode,
+		lineItem.ProjectID,
+		lineItem.CostCenterID,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create line item: %w", err)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return fmt.Errorf("failed to get last insert id: %w", err)
+	}
+
+	lineItem.LineID = int(id)
+	return nil
+}
+
+func (r *lineItemRepository) GetLineItemByID(lineID int) (*domain.LineItem, error) {
+	query := `
+		SELECT line_id, voucher_id, account_no, debit_amount, credit_amount, tax_code, project_id, cost_center_id
+		FROM line_items
+		WHERE line_id = ?
+	`
+	lineItem := &domain.LineItem{}
+	err := r.db.QueryRow(query, lineID).Scan(
+		&lineItem.LineID,
+		&lineItem.VoucherID,
+		&lineItem.AccountNo,
+		&lineItem.DebitAmount,
+		&lineItem.CreditAmount,
+		&lineItem.TaxCode,
+		&lineItem.ProjectID,
+		&lineItem.CostCenterID,
+	)
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("line item not found")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get line item: %w", err)
+	}
+
+	return lineItem, nil
+}
+
+func (r *lineItemRepository) GetLineItemsByVoucherID(voucherID int) ([]*domain.LineItem, error) {
+	query := `
+		SELECT line_id, voucher_id, account_no, debit_amount, credit_amount, tax_code, project_id, cost_center_id
+		FROM line_items
+		WHERE voucher_id = ?
+		ORDER BY line_id
+	`
+	rows, err := r.db.Query(query, voucherID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get line items by voucher: %w", err)
+	}
+	defer rows.Close()
+
+	var lineItems []*domain.LineItem
+	for rows.Next() {
+		lineItem := &domain.LineItem{}
+		err := rows.Scan(
+			&lineItem.LineID,
+			&lineItem.VoucherID,
+			&lineItem.AccountNo,
+			&lineItem.DebitAmount,
+			&lineItem.CreditAmount,
+			&lineItem.TaxCode,
+			&lineItem.ProjectID,
+			&lineItem.CostCenterID,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan line item: %w", err)
+		}
+		lineItems = append(lineItems, lineItem)
+	}
+
+	return lineItems, nil
+}
+
+func (r *lineItemRepository) GetLineItemsByAccountNo(accountNo int) ([]*domain.LineItem, error) {
+	query := `
+		SELECT line_id, voucher_id, account_no, debit_amount, credit_amount, tax_code, project_id, cost_center_id
+		FROM line_items
+		WHERE account_no = ?
+		ORDER BY line_id
+	`
+	rows, err := r.db.Query(query, accountNo)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get line items by account: %w", err)
+	}
+	defer rows.Close()
+
+	var lineItems []*domain.LineItem
+	for rows.Next() {
+		lineItem := &domain.LineItem{}
+		err := rows.Scan(
+			&lineItem.LineID,
+			&lineItem.VoucherID,
+			&lineItem.AccountNo,
+			&lineItem.DebitAmount,
+			&lineItem.CreditAmount,
+			&lineItem.TaxCode,
+			&lineItem.ProjectID,
+			&lineItem.CostCenterID,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan line item: %w", err)
+		}
+		lineItems = append(lineItems, lineItem)
+	}
+
+	return lineItems, nil
+}
+
+func (r *lineItemRepository) UpdateLineItem(lineItem *domain.LineItem) error {
+	query := `
+		UPDATE line_items
+		SET voucher_id = ?, account_no = ?, debit_amount = ?, credit_amount = ?, tax_code = ?, project_id = ?, cost_center_id = ?
+		WHERE line_id = ?
+	`
+	_, err := r.db.Exec(query,
+		lineItem.VoucherID,
+		lineItem.AccountNo,
+		lineItem.DebitAmount,
+		lineItem.CreditAmount,
+		lineItem.TaxCode,
+		lineItem.ProjectID,
+		lineItem.CostCenterID,
+		lineItem.LineID,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update line item: %w", err)
+	}
+
+	return nil
+}
+
+func (r *lineItemRepository) DeleteLineItem(lineID int) error {
+	query := `DELETE FROM line_items WHERE line_id = ?`
+	_, err := r.db.Exec(query, lineID)
+	if err != nil {
+		return fmt.Errorf("failed to delete line item: %w", err)
+	}
+
+	return nil
+}
+
+func (r *lineItemRepository) DeleteLineItemsByVoucherID(voucherID int) error {
+	query := `DELETE FROM line_items WHERE voucher_id = ?`
+	_, err := r.db.Exec(query, voucherID)
+	if err != nil {
+		return fmt.Errorf("failed to delete line items by voucher: %w", err)
+	}
+
+	return nil
+}
