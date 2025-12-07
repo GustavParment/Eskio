@@ -1,6 +1,7 @@
 # Environment variables
 .env
 
+
 # Binary files
 *.exe
 *.exe~
