@@ -52,11 +52,21 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	// Set JWT as httpOnly cookie
+	c.SetCookie(
+		"token",           // name
+		token,             // value
+		604800,            // maxAge (7 days in seconds)
+		"/",               // path
+		"",                // domain (empty for current domain)
+		false,             // secure (set true in production with HTTPS!)
+		true,              // httpOnly
+	)
+
 	user.PasswordHash = ""
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "user registered successfully",
-		"token":   token,
 		"user":    user,
 	})
 }
@@ -88,28 +98,31 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	// Set JWT as httpOnly cookie
+	c.SetCookie(
+		"token",           // name
+		token,             // value
+		604800,            // maxAge (7 days in seconds)
+		"/",               // path
+		"",                // domain (empty for current domain)
+		false,             // secure (set true in production with HTTPS!)
+		true,              // httpOnly
+	)
+
 	user.PasswordHash = ""
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "login successful",
-		"token":   token,
 		"user":    user,
 	})
 }
 
 // RefreshToken handles POST /auth/refresh
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
-	if authHeader == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "authorization header required"})
-		return
-	}
-
-	var tokenString string
-	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
-		tokenString = authHeader[7:]
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header format"})
+	// Get token from cookie
+	tokenString, err := c.Cookie("token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "no token found"})
 		return
 	}
 
@@ -119,8 +132,37 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
+	// Set new token as httpOnly cookie
+	c.SetCookie(
+		"token",
+		newToken,
+		604800,
+		"/",
+		"",
+		false,
+		true,
+	)
+
 	c.JSON(http.StatusOK, gin.H{
-		"token": newToken,
+		"message": "token refreshed successfully",
+	})
+}
+
+// Logout handles POST /auth/logout
+func (h *AuthHandler) Logout(c *gin.Context) {
+	// Clear the cookie by setting maxAge to -1
+	c.SetCookie(
+		"token",
+		"",
+		-1,
+		"/",
+		"",
+		false,
+		true,
+	)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "logged out successfully",
 	})
 }
 

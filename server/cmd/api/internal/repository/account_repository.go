@@ -80,7 +80,7 @@ func (r *accountRepository) GetAllAccounts() ([]*domain.Account, error) {
 	}
 	defer rows.Close()
 
-	var accounts []*domain.Account
+	accounts := make([]*domain.Account, 0)
 	for rows.Next() {
 		account := &domain.Account{}
 		err := rows.Scan(
@@ -113,7 +113,7 @@ func (r *accountRepository) GetAccountsByGroup(accountGroup int) ([]*domain.Acco
 	}
 	defer rows.Close()
 
-	var accounts []*domain.Account
+	accounts := make([]*domain.Account, 0)
 	for rows.Next() {
 		account := &domain.Account{}
 		err := rows.Scan(

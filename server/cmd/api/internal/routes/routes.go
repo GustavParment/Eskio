@@ -21,6 +21,7 @@ func SetupRoutes(
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
+			auth.POST("/logout", authHandler.Logout)
 			auth.POST("/refresh", authHandler.RefreshToken)
 			auth.GET("/me", authMiddleware, authHandler.GetCurrentUser)
 		}

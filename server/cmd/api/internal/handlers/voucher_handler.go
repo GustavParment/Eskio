@@ -65,10 +65,7 @@ func (h *VoucherHandler) GetAllVouchers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"vouchers": vouchers,
-		"count":    len(vouchers),
-	})
+	c.JSON(http.StatusOK, vouchers)
 }
 
 // GetVouchersByPeriod handles GET /vouchers/period/:period

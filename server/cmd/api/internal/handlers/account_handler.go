@@ -65,10 +65,7 @@ func (h *AccountHandler) GetAllAccounts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"accounts": accounts,
-		"count":    len(accounts),
-	})
+	c.JSON(http.StatusOK, accounts)
 }
 
 // GetAccountsByGroup handles GET /accounts/group/:group

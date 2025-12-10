@@ -3,31 +3,20 @@ package middleware
 import (
 	"cmd/api/internal/auth"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-// AuthMiddleware creates a middleware that validates JWT tokens
+// AuthMiddleware creates a middleware that validates JWT tokens from httpOnly cookies
 func AuthMiddleware(jwtManager *auth.JWTManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get token from Authorization header
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "authorization header required"})
+		// Get token from cookie
+		tokenString, err := c.Cookie("token")
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "no authentication token found"})
 			c.Abort()
 			return
 		}
-
-		// Check if header starts with "Bearer "
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header format"})
-			c.Abort()
-			return
-		}
-
-		tokenString := parts[1]
 
 		// Validate token
 		claims, err := jwtManager.ValidateToken(tokenString)

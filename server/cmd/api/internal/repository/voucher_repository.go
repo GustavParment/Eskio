@@ -88,7 +88,7 @@ func (r *voucherRepository) GetAllVouchers() ([]*domain.Voucher, error) {
 	}
 	defer rows.Close()
 
-	var vouchers []*domain.Voucher
+	vouchers := make([]*domain.Voucher, 0)
 	for rows.Next() {
 		voucher := &domain.Voucher{}
 		err := rows.Scan(
@@ -122,7 +122,7 @@ func (r *voucherRepository) GetVouchersByPeriod(period string) ([]*domain.Vouche
 	}
 	defer rows.Close()
 
-	var vouchers []*domain.Voucher
+	vouchers := make([]*domain.Voucher, 0)
 	for rows.Next() {
 		voucher := &domain.Voucher{}
 		err := rows.Scan(
@@ -156,7 +156,7 @@ func (r *voucherRepository) GetVouchersByCreatedBy(userID int) ([]*domain.Vouche
 	}
 	defer rows.Close()
 
-	var vouchers []*domain.Voucher
+	vouchers := make([]*domain.Voucher, 0)
 	for rows.Next() {
 		voucher := &domain.Voucher{}
 		err := rows.Scan(

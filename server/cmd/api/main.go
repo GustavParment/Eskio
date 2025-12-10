@@ -45,6 +45,9 @@ func main() {
 
 	router := gin.Default()
 
+	// Add CORS middleware
+	router.Use(middleware.CORSMiddleware())
+
 	routes.SetupRoutes(router, userHandler, accountHandler, lineItemHandler, voucherHandler, authHandler, authMiddleware)
 
 	log.Println("Starting server on", cfg.ServerPort)
