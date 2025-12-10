@@ -26,7 +26,7 @@ func NewAccountRepository(db *sql.DB) AccountRepository {
 func (r *accountRepository) CreateAccount(account *domain.Account) error {
 	query := `
 		INSERT INTO accounts (account_no, account_name, account_group, tax_standard, type, standard_side)
-		VALUES (?, ?, ?, ?, ?, ?)
+		VALUES ($1, $2, $3, $4, $5, $6)
 	`
 	_, err := r.db.Exec(query,
 		account.AccountNo,
@@ -47,7 +47,7 @@ func (r *accountRepository) GetAccountByNo(accountNo int) (*domain.Account, erro
 	query := `
 		SELECT account_no, account_name, account_group, tax_standard, type, standard_side
 		FROM accounts
-		WHERE account_no = ?
+		WHERE account_no = $1
 	`
 	account := &domain.Account{}
 	err := r.db.QueryRow(query, accountNo).Scan(
@@ -104,7 +104,7 @@ func (r *accountRepository) GetAccountsByGroup(accountGroup int) ([]*domain.Acco
 	query := `
 		SELECT account_no, account_name, account_group, tax_standard, type, standard_side
 		FROM accounts
-		WHERE account_group = ?
+		WHERE account_group = $1
 		ORDER BY account_no
 	`
 	rows, err := r.db.Query(query, accountGroup)
@@ -136,8 +136,8 @@ func (r *accountRepository) GetAccountsByGroup(accountGroup int) ([]*domain.Acco
 func (r *accountRepository) UpdateAccount(account *domain.Account) error {
 	query := `
 		UPDATE accounts
-		SET account_name = ?, account_group = ?, tax_standard = ?, type = ?, standard_side = ?
-		WHERE account_no = ?
+		SET account_name = $1, account_group = $2, tax_standard = $3, type = $4, standard_side = $5
+		WHERE account_no = $1
 	`
 	_, err := r.db.Exec(query,
 		account.AccountName,
@@ -155,7 +155,7 @@ func (r *accountRepository) UpdateAccount(account *domain.Account) error {
 }
 
 func (r *accountRepository) DeleteAccount(accountNo int) error {
-	query := `DELETE FROM accounts WHERE account_no = ?`
+	query := `DELETE FROM accounts WHERE account_no = $1`
 	_, err := r.db.Exec(query, accountNo)
 	if err != nil {
 		return fmt.Errorf("failed to delete account: %w", err)

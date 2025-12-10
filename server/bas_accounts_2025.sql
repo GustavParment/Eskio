@@ -1,0 +1,393 @@
+-- BAS 2025 Kontoplan - Comprehensive Account List
+-- This will populate the accounts table with standard Swedish BAS accounts
+
+-- Clear existing accounts (optional - comment out if you want to keep existing)
+-- DELETE FROM accounts;
+
+-- Group 1: Tillgångar (Assets) - Debit side, Balance Sheet
+INSERT INTO accounts (account_no, account_name, account_group, tax_standard, type, standard_side) VALUES
+-- Immateriella anläggningstillgångar
+(1010, 'Utvecklingsutgifter', 1, '0%', 'BS', 'Debit'),
+(1020, 'Koncessioner m.m.', 1, '0%', 'BS', 'Debit'),
+(1030, 'Patent', 1, '0%', 'BS', 'Debit'),
+(1040, 'Licenser', 1, '0%', 'BS', 'Debit'),
+(1050, 'Varumärken', 1, '0%', 'BS', 'Debit'),
+(1070, 'Goodwill', 1, '0%', 'BS', 'Debit'),
+(1080, 'Förskott för immateriella anläggningstillgångar', 1, '0%', 'BS', 'Debit'),
+
+-- Byggnader och mark
+(1110, 'Byggnader', 1, '0%', 'BS', 'Debit'),
+(1130, 'Mark', 1, '0%', 'BS', 'Debit'),
+(1140, 'Tomter och obebyggda markområden', 1, '0%', 'BS', 'Debit'),
+(1150, 'Markanläggningar', 1, '0%', 'BS', 'Debit'),
+(1180, 'Pågående nyanläggningar och förskott', 1, '0%', 'BS', 'Debit'),
+
+-- Maskiner och inventarier
+(1210, 'Maskiner och andra tekniska anläggningar', 1, '25%', 'BS', 'Debit'),
+(1220, 'Inventarier och verktyg', 1, '25%', 'BS', 'Debit'),
+(1230, 'Installationer', 1, '25%', 'BS', 'Debit'),
+(1240, 'Bilar och andra transportmedel', 1, '25%', 'BS', 'Debit'),
+(1250, 'Datorer', 1, '25%', 'BS', 'Debit'),
+(1280, 'Pågående nyanläggningar maskiner', 1, '25%', 'BS', 'Debit'),
+
+-- Finansiella anläggningstillgångar
+(1310, 'Andelar i koncernföretag', 1, '0%', 'BS', 'Debit'),
+(1320, 'Långfristiga fordringar hos koncernföretag', 1, '0%', 'BS', 'Debit'),
+(1330, 'Andelar i intresseföretag', 1, '0%', 'BS', 'Debit'),
+(1350, 'Andelar och värdepapper i andra företag', 1, '0%', 'BS', 'Debit'),
+(1380, 'Andra långfristiga fordringar', 1, '0%', 'BS', 'Debit'),
+
+-- Lager
+(1410, 'Lager av råvaror', 1, '25%', 'BS', 'Debit'),
+(1420, 'Lager av tillsatsmaterial och förnödenheter', 1, '25%', 'BS', 'Debit'),
+(1440, 'Produkter i arbete', 1, '25%', 'BS', 'Debit'),
+(1450, 'Lager av färdiga varor', 1, '25%', 'BS', 'Debit'),
+(1460, 'Lager av handelsvaror', 1, '25%', 'BS', 'Debit'),
+(1470, 'Pågående arbeten', 1, '25%', 'BS', 'Debit'),
+(1480, 'Förskott för varor och tjänster', 1, '0%', 'BS', 'Debit'),
+
+-- Kundfordringar
+(1510, 'Kundfordringar', 1, '0%', 'BS', 'Debit'),
+(1520, 'Växelfordringar', 1, '0%', 'BS', 'Debit'),
+(1530, 'Kontraktsfordringar', 1, '0%', 'BS', 'Debit'),
+(1560, 'Kundfordringar hos koncernföretag', 1, '0%', 'BS', 'Debit'),
+(1570, 'Kundfordringar hos intresseföretag', 1, '0%', 'BS', 'Debit'),
+
+-- Övriga kortfristiga fordringar
+(1610, 'Kortfristiga fordringar hos anställda', 1, '0%', 'BS', 'Debit'),
+(1620, 'Upparbetad men ej fakturerad intäkt', 1, '0%', 'BS', 'Debit'),
+(1630, 'Avräkning för skatter och avgifter', 1, '0%', 'BS', 'Debit'),
+(1640, 'Skattefordringar', 1, '0%', 'BS', 'Debit'),
+(1650, 'Momsfordran', 1, '0%', 'BS', 'Debit'),
+(1660, 'Kortfristiga fordringar hos koncernföretag', 1, '0%', 'BS', 'Debit'),
+(1670, 'Kortfristiga fordringar hos intresseföretag', 1, '0%', 'BS', 'Debit'),
+(1680, 'Andra kortfristiga fordringar', 1, '0%', 'BS', 'Debit'),
+
+-- Förutbetalda kostnader och upplupna intäkter
+(1710, 'Förutbetalda hyreskostnader', 1, '0%', 'BS', 'Debit'),
+(1720, 'Förutbetalda leasingavgifter', 1, '0%', 'BS', 'Debit'),
+(1730, 'Förutbetalda försäkringspremier', 1, '0%', 'BS', 'Debit'),
+(1740, 'Förutbetalda räntekostnader', 1, '0%', 'BS', 'Debit'),
+(1750, 'Upplupna hyresintäkter', 1, '0%', 'BS', 'Debit'),
+(1760, 'Upplupna ränteintäkter', 1, '0%', 'BS', 'Debit'),
+(1790, 'Övriga förutbetalda kostnader och upplupna intäkter', 1, '0%', 'BS', 'Debit'),
+
+-- Kortfristiga placeringar
+(1810, 'Andelar i börsnoterade företag', 1, '0%', 'BS', 'Debit'),
+(1820, 'Obligationer', 1, '0%', 'BS', 'Debit'),
+(1880, 'Andra kortfristiga placeringar', 1, '0%', 'BS', 'Debit'),
+
+-- Kassa och bank
+(1910, 'Kassa', 1, '0%', 'BS', 'Debit'),
+(1920, 'PlusGiro', 1, '0%', 'BS', 'Debit'),
+(1930, 'Företagskonto / checkkonto', 1, '0%', 'BS', 'Debit'),
+(1940, 'Övriga bankkonton', 1, '0%', 'BS', 'Debit'),
+(1950, 'Bankcertifikat', 1, '0%', 'BS', 'Debit')
+
+ON CONFLICT (account_no) DO NOTHING;
+
+-- Group 2: Eget kapital och skulder (Equity and Liabilities) - Credit side, Balance Sheet
+INSERT INTO accounts (account_no, account_name, account_group, tax_standard, type, standard_side) VALUES
+-- Eget kapital
+(2010, 'Eget kapital', 2, '0%', 'BS', 'Credit'),
+(2081, 'Aktiekapital', 2, '0%', 'BS', 'Credit'),
+(2086, 'Reservfond', 2, '0%', 'BS', 'Credit'),
+(2091, 'Balanserad vinst eller förlust', 2, '0%', 'BS', 'Credit'),
+(2099, 'Årets resultat', 2, '0%', 'BS', 'Credit'),
+
+-- Obeskattade reserver
+(2110, 'Periodiseringsfonder', 2, '0%', 'BS', 'Credit'),
+(2150, 'Ackumulerade överavskrivningar', 2, '0%', 'BS', 'Credit'),
+
+-- Avsättningar
+(2210, 'Avsättningar för pensioner', 2, '0%', 'BS', 'Credit'),
+(2220, 'Avsättningar för garantier', 2, '0%', 'BS', 'Credit'),
+(2290, 'Övriga avsättningar', 2, '0%', 'BS', 'Credit'),
+
+-- Långfristiga skulder
+(2330, 'Checkräkningskredit', 2, '0%', 'BS', 'Credit'),
+(2350, 'Långfristiga skulder till kreditinstitut', 2, '0%', 'BS', 'Credit'),
+(2360, 'Långfristiga skulder till koncernföretag', 2, '0%', 'BS', 'Credit'),
+(2390, 'Övriga långfristiga skulder', 2, '0%', 'BS', 'Credit'),
+
+-- Kortfristiga skulder
+(2410, 'Kortfristiga låneskulder till kreditinstitut', 2, '0%', 'BS', 'Credit'),
+(2420, 'Förskott från kunder', 2, '0%', 'BS', 'Credit'),
+(2440, 'Leverantörsskulder', 2, '0%', 'BS', 'Credit'),
+(2460, 'Leverantörsskulder till koncernföretag', 2, '0%', 'BS', 'Credit'),
+(2470, 'Leverantörsskulder till intresseföretag', 2, '0%', 'BS', 'Credit'),
+
+-- Skatteskulder
+(2510, 'Kortfristiga skulder till anställda', 2, '0%', 'BS', 'Credit'),
+(2511, 'Skulder för löner', 2, '0%', 'BS', 'Credit'),
+(2512, 'Skulder för semesterlön', 2, '0%', 'BS', 'Credit'),
+(2513, 'Skulder för outtagna semesterdagar', 2, '0%', 'BS', 'Credit'),
+(2514, 'Skulder för övertid', 2, '0%', 'BS', 'Credit'),
+(2515, 'Skulder för ob-ersättning', 2, '0%', 'BS', 'Credit'),
+
+-- Skatteskulder
+(2610, 'Utgående moms', 2, '0%', 'BS', 'Credit'),
+(2620, 'Utgående moms på varor', 2, '25%', 'BS', 'Credit'),
+(2621, 'Utgående moms 25%', 2, '25%', 'BS', 'Credit'),
+(2622, 'Utgående moms 12%', 2, '12%', 'BS', 'Credit'),
+(2623, 'Utgående moms 6%', 2, '6%', 'BS', 'Credit'),
+(2630, 'Avräkning för skatter och avgifter', 2, '0%', 'BS', 'Credit'),
+(2640, 'Ingående moms', 2, '0%', 'BS', 'Debit'),
+(2641, 'Ingående moms på varor', 2, '0%', 'BS', 'Debit'),
+(2642, 'Ingående moms på tjänster', 2, '0%', 'BS', 'Debit'),
+(2645, 'Beräknad ingående moms', 2, '0%', 'BS', 'Debit'),
+(2650, 'Redovisningskonto för moms', 2, '0%', 'BS', 'Credit'),
+
+-- Övriga kortfristiga skulder
+(2710, 'Kortfristiga skulder till koncernföretag', 2, '0%', 'BS', 'Credit'),
+(2730, 'Skulder för fastighetsavgift', 2, '0%', 'BS', 'Credit'),
+(2731, 'Skulder för källskatt', 2, '0%', 'BS', 'Credit'),
+(2732, 'Skulder för särskild löneskatt på pensionskostnader', 2, '0%', 'BS', 'Credit'),
+(2740, 'Skulder för sociala avgifter', 2, '0%', 'BS', 'Credit'),
+(2741, 'Skulder för arbetsgivaravgifter', 2, '0%', 'BS', 'Credit'),
+(2742, 'Skulder för pensionsförsäkringspremier', 2, '0%', 'BS', 'Credit'),
+
+-- Upplupna kostnader och förutbetalda intäkter
+(2910, 'Upplupna löner', 2, '0%', 'BS', 'Credit'),
+(2920, 'Upplupna semesterlöner', 2, '0%', 'BS', 'Credit'),
+(2930, 'Upplupna sociala avgifter', 2, '0%', 'BS', 'Credit'),
+(2940, 'Upplupna räntekostnader', 2, '0%', 'BS', 'Credit'),
+(2950, 'Förutbetalda hyresintäkter', 2, '0%', 'BS', 'Credit'),
+(2990, 'Övriga upplupna kostnader och förutbetalda intäkter', 2, '0%', 'BS', 'Credit')
+
+ON CONFLICT (account_no) DO NOTHING;
+
+-- Group 3: Intäkter (Revenue) - Credit side, Income Statement
+INSERT INTO accounts (account_no, account_name, account_group, tax_standard, type, standard_side) VALUES
+(3000, 'Försäljning varor och tjänster', 3, '25%', 'P&L', 'Credit'),
+(3001, 'Försäljning varor, Sverige', 3, '25%', 'P&L', 'Credit'),
+(3002, 'Försäljning varor, EU', 3, '0%', 'P&L', 'Credit'),
+(3003, 'Försäljning varor, utanför EU', 3, '0%', 'P&L', 'Credit'),
+(3010, 'Försäljning varor moms 25%', 3, '25%', 'P&L', 'Credit'),
+(3011, 'Försäljning varor moms 12%', 3, '12%', 'P&L', 'Credit'),
+(3012, 'Försäljning varor moms 6%', 3, '6%', 'P&L', 'Credit'),
+(3013, 'Försäljning varor moms 0%', 3, '0%', 'P&L', 'Credit'),
+(3040, 'Försäljning tjänster moms 25%', 3, '25%', 'P&L', 'Credit'),
+(3041, 'Försäljning tjänster moms 12%', 3, '12%', 'P&L', 'Credit'),
+(3042, 'Försäljning tjänster moms 6%', 3, '6%', 'P&L', 'Credit'),
+(3043, 'Försäljning tjänster moms 0%', 3, '0%', 'P&L', 'Credit'),
+(3051, 'Försäljning tjänster, EU', 3, '0%', 'P&L', 'Credit'),
+(3052, 'Försäljning tjänster, utanför EU', 3, '0%', 'P&L', 'Credit'),
+(3100, 'Fakturerad frakt', 3, '25%', 'P&L', 'Credit'),
+(3210, 'Hyresintäkter lokaler', 3, '25%', 'P&L', 'Credit'),
+(3220, 'Hyresintäkter maskiner och inventarier', 3, '25%', 'P&L', 'Credit'),
+(3310, 'Provisionsintäkter', 3, '25%', 'P&L', 'Credit'),
+(3320, 'Licensintäkter', 3, '25%', 'P&L', 'Credit'),
+(3330, 'Royaltyintäkter', 3, '25%', 'P&L', 'Credit'),
+(3500, 'Fakturerade kostnader', 3, '25%', 'P&L', 'Credit'),
+(3510, 'Sidointäkter', 3, '25%', 'P&L', 'Credit'),
+(3520, 'Exportbidrag', 3, '0%', 'P&L', 'Credit'),
+(3530, 'Utrangerad förpackning, returpapper', 3, '25%', 'P&L', 'Credit'),
+(3540, 'Skrot och avfall', 3, '25%', 'P&L', 'Credit'),
+(3550, 'Försäljning av anläggningstillgångar', 3, '25%', 'P&L', 'Credit'),
+(3580, 'Vinst från avyttring av materiella anläggningstillgångar', 3, '0%', 'P&L', 'Credit'),
+(3590, 'Vinst från avyttring av finansiella anläggningstillgångar', 3, '0%', 'P&L', 'Credit'),
+(3600, 'Erhållna bidrag', 3, '0%', 'P&L', 'Credit'),
+(3610, 'Erhållna statsbidrag', 3, '0%', 'P&L', 'Credit'),
+(3620, 'Övriga erhållna bidrag', 3, '0%', 'P&L', 'Credit'),
+(3730, 'Lämnade kassarabatter', 3, '0%', 'P&L', 'Debit'),
+(3740, 'Öresutjämning', 3, '0%', 'P&L', 'Credit'),
+(3910, 'Hyra av arbetsmaskiner och inventarier', 3, '25%', 'P&L', 'Credit'),
+(3920, 'Intäktskorrigeringar', 3, '0%', 'P&L', 'Credit'),
+(3960, 'Valutakursvinster på fordringar och skulder av rörelsekaraktär', 3, '0%', 'P&L', 'Credit'),
+(3970, 'Valutakursförluster på fordringar och skulder av rörelsekaraktär', 3, '0%', 'P&L', 'Debit'),
+(3990, 'Övriga rörelseintäkter', 3, '0%', 'P&L', 'Credit')
+
+ON CONFLICT (account_no) DO NOTHING;
+
+-- Group 4: Kostnader för varor, material och underentreprenörer (Cost of Goods) - Debit side, Income Statement
+INSERT INTO accounts (account_no, account_name, account_group, tax_standard, type, standard_side) VALUES
+(4000, 'Inköp varor och material', 4, '25%', 'P&L', 'Debit'),
+(4010, 'Inköp varor inom Sverige', 4, '25%', 'P&L', 'Debit'),
+(4011, 'Inköp varor inom EU', 4, '0%', 'P&L', 'Debit'),
+(4012, 'Inköp varor utanför EU', 4, '0%', 'P&L', 'Debit'),
+(4050, 'Inköp material', 4, '25%', 'P&L', 'Debit'),
+(4100, 'Frakt och transport', 4, '25%', 'P&L', 'Debit'),
+(4200, 'Underentreprenörer', 4, '25%', 'P&L', 'Debit'),
+(4300, 'Lagerförändring varor', 4, '0%', 'P&L', 'Debit'),
+(4310, 'Lagerförändring råvaror', 4, '0%', 'P&L', 'Debit'),
+(4320, 'Lagerförändring produkter i arbete', 4, '0%', 'P&L', 'Debit'),
+(4330, 'Lagerförändring färdiga varor', 4, '0%', 'P&L', 'Debit'),
+(4500, 'Förändring av pågående arbeten', 4, '0%', 'P&L', 'Debit'),
+(4900, 'Övriga kostnader för varor', 4, '25%', 'P&L', 'Debit')
+
+ON CONFLICT (account_no) DO NOTHING;
+
+-- Group 5: Övriga externa kostnader (Other External Costs) - Debit side, Income Statement
+INSERT INTO accounts (account_no, account_name, account_group, tax_standard, type, standard_side) VALUES
+(5000, 'Lokalkostnader', 5, '25%', 'P&L', 'Debit'),
+(5010, 'Lokalhyra', 5, '25%', 'P&L', 'Debit'),
+(5020, 'El för belysning', 5, '25%', 'P&L', 'Debit'),
+(5030, 'Värme', 5, '25%', 'P&L', 'Debit'),
+(5040, 'Vatten och avlopp', 5, '25%', 'P&L', 'Debit'),
+(5050, 'Renhållning', 5, '25%', 'P&L', 'Debit'),
+(5060, 'Fastighetsskötsel', 5, '25%', 'P&L', 'Debit'),
+(5070, 'Reparation och underhåll av lokaler', 5, '25%', 'P&L', 'Debit'),
+(5090, 'Övriga lokalkostnader', 5, '25%', 'P&L', 'Debit'),
+(5100, 'Fastighetskostnader', 5, '25%', 'P&L', 'Debit'),
+(5110, 'Tomträttsavgäld', 5, '0%', 'P&L', 'Debit'),
+(5120, 'Fastighetsavgift/fastighetsskatt', 5, '0%', 'P&L', 'Debit'),
+(5130, 'El för drift', 5, '25%', 'P&L', 'Debit'),
+(5190, 'Övriga fastighetskostnader', 5, '25%', 'P&L', 'Debit'),
+(5200, 'Hyra av anläggningstillgångar', 5, '25%', 'P&L', 'Debit'),
+(5210, 'Hyra av maskiner och andra tekniska anläggningar', 5, '25%', 'P&L', 'Debit'),
+(5220, 'Hyra av inventarier och verktyg', 5, '25%', 'P&L', 'Debit'),
+(5290, 'Övriga hyreskostnader', 5, '25%', 'P&L', 'Debit'),
+(5300, 'Energikostnader', 5, '25%', 'P&L', 'Debit'),
+(5310, 'El för drift', 5, '25%', 'P&L', 'Debit'),
+(5320, 'Gas', 5, '25%', 'P&L', 'Debit'),
+(5330, 'Eldningsolja och biobränsle', 5, '25%', 'P&L', 'Debit'),
+(5390, 'Övriga energikostnader', 5, '25%', 'P&L', 'Debit'),
+(5400, 'Förbrukningsinventarier och förbrukningsmaterial', 5, '25%', 'P&L', 'Debit'),
+(5410, 'Förbrukningsinventarier', 5, '25%', 'P&L', 'Debit'),
+(5420, 'Programvaror och licenser', 5, '25%', 'P&L', 'Debit'),
+(5460, 'Förbrukningsmaterial', 5, '25%', 'P&L', 'Debit'),
+(5480, 'Arbetskläder och skyddsmaterial', 5, '25%', 'P&L', 'Debit'),
+(5500, 'Reparation och underhåll', 5, '25%', 'P&L', 'Debit'),
+(5510, 'Reparation och underhåll av maskiner', 5, '25%', 'P&L', 'Debit'),
+(5520, 'Reparation och underhåll av inventarier och verktyg', 5, '25%', 'P&L', 'Debit'),
+(5590, 'Övrig reparation och underhåll', 5, '25%', 'P&L', 'Debit'),
+(5600, 'Kostnader för transportmedel', 5, '25%', 'P&L', 'Debit'),
+(5610, 'Drivmedel', 5, '25%', 'P&L', 'Debit'),
+(5611, 'Bensin', 5, '25%', 'P&L', 'Debit'),
+(5612, 'Diesel', 5, '25%', 'P&L', 'Debit'),
+(5615, 'Miljöbil', 5, '25%', 'P&L', 'Debit'),
+(5620, 'Reparation och underhåll av transportmedel', 5, '25%', 'P&L', 'Debit'),
+(5630, 'Leasing av transportmedel', 5, '25%', 'P&L', 'Debit'),
+(5700, 'Frakter och transporter', 5, '25%', 'P&L', 'Debit'),
+(5800, 'Resekostnader', 5, '25%', 'P&L', 'Debit'),
+(5810, 'Biljetter', 5, '25%', 'P&L', 'Debit'),
+(5820, 'Hyrbil', 5, '25%', 'P&L', 'Debit'),
+(5830, 'Kost och logi', 5, '12%', 'P&L', 'Debit'),
+(5900, 'Reklam och PR', 5, '25%', 'P&L', 'Debit'),
+(5910, 'Annonsering', 5, '25%', 'P&L', 'Debit'),
+(5920, 'Reklammaterial', 5, '25%', 'P&L', 'Debit'),
+(5930, 'Representation', 5, '25%', 'P&L', 'Debit'),
+(5940, 'Utbildning', 5, '25%', 'P&L', 'Debit')
+
+ON CONFLICT (account_no) DO NOTHING;
+
+-- Group 6: Övriga externa kostnader (fortsättning) + Personalkostnader
+INSERT INTO accounts (account_no, account_name, account_group, tax_standard, type, standard_side) VALUES
+(6000, 'Lokalkostnader', 6, '25%', 'P&L', 'Debit'),
+(6010, 'Licenser och överlåtelser', 6, '25%', 'P&L', 'Debit'),
+(6020, 'Royalties', 6, '25%', 'P&L', 'Debit'),
+(6050, 'Telefon och internet', 6, '25%', 'P&L', 'Debit'),
+(6060, 'Telekommunikation', 6, '25%', 'P&L', 'Debit'),
+(6070, 'Postbefordran', 6, '25%', 'P&L', 'Debit'),
+(6100, 'Trycksaker och kopiering', 6, '25%', 'P&L', 'Debit'),
+(6150, 'Kontorsmaterial', 6, '25%', 'P&L', 'Debit'),
+(6200, 'Försäkringspremier', 6, '25%', 'P&L', 'Debit'),
+(6210, 'Försäkringspremier för lokaler', 6, '25%', 'P&L', 'Debit'),
+(6220, 'Försäkringspremier för maskiner', 6, '25%', 'P&L', 'Debit'),
+(6230, 'Försäkringspremier för inventarier', 6, '25%', 'P&L', 'Debit'),
+(6250, 'Trafikförsäkring', 6, '0%', 'P&L', 'Debit'),
+(6300, 'Redovisningstjänster', 6, '25%', 'P&L', 'Debit'),
+(6310, 'Bokföringstjänster', 6, '25%', 'P&L', 'Debit'),
+(6320, 'Revisions- och rådgivningstjänster', 6, '25%', 'P&L', 'Debit'),
+(6330, 'Ekonomisk förvaltning', 6, '25%', 'P&L', 'Debit'),
+(6340, 'Juridiska tjänster', 6, '25%', 'P&L', 'Debit'),
+(6350, 'IT-tjänster', 6, '25%', 'P&L', 'Debit'),
+(6360, 'Kunskapsinhämtning', 6, '25%', 'P&L', 'Debit'),
+(6370, 'Utbildning och personalutveckling', 6, '25%', 'P&L', 'Debit'),
+(6400, 'Bankkostnader', 6, '25%', 'P&L', 'Debit'),
+(6500, 'Övriga externa tjänster', 6, '25%', 'P&L', 'Debit'),
+(6530, 'Redovisningstjänster', 6, '25%', 'P&L', 'Debit'),
+(6540, 'IT-tjänster', 6, '25%', 'P&L', 'Debit'),
+(6550, 'Konsultarvoden', 6, '25%', 'P&L', 'Debit'),
+(6570, 'Bankkostnader', 6, '25%', 'P&L', 'Debit'),
+(6900, 'Övriga externa kostnader', 6, '25%', 'P&L', 'Debit'),
+(6970, 'Tidningar, facklitteratur', 6, '6%', 'P&L', 'Debit'),
+(6980, 'Föreningsavgifter', 6, '25%', 'P&L', 'Debit'),
+(6990, 'Övriga externa kostnader', 6, '25%', 'P&L', 'Debit')
+
+ON CONFLICT (account_no) DO NOTHING;
+
+-- Group 7: Personalkostnader och avskrivningar
+INSERT INTO accounts (account_no, account_name, account_group, tax_standard, type, standard_side) VALUES
+(7000, 'Löner till arbetare', 7, '0%', 'P&L', 'Debit'),
+(7010, 'Löner till arbetsledare', 7, '0%', 'P&L', 'Debit'),
+(7020, 'Löner till kontorspersonal', 7, '0%', 'P&L', 'Debit'),
+(7030, 'Löner till försäljningspersonal', 7, '0%', 'P&L', 'Debit'),
+(7080, 'Löner till styrelseledamöter', 7, '0%', 'P&L', 'Debit'),
+(7081, 'Löner till VD', 7, '0%', 'P&L', 'Debit'),
+(7082, 'Löner till övriga anställda', 7, '0%', 'P&L', 'Debit'),
+(7210, 'Ersättningar och förmåner till styrelseledamöter', 7, '0%', 'P&L', 'Debit'),
+(7220, 'Arvoden till revisor', 7, '25%', 'P&L', 'Debit'),
+(7230, 'Tantiem', 7, '0%', 'P&L', 'Debit'),
+(7280, 'Semesterlöner', 7, '0%', 'P&L', 'Debit'),
+(7290, 'Kostnadsersättningar till anställda', 7, '0%', 'P&L', 'Debit'),
+(7300, 'Bilersättningar', 7, '0%', 'P&L', 'Debit'),
+(7310, 'Traktamenten, inrikes', 7, '0%', 'P&L', 'Debit'),
+(7320, 'Traktamenten, utrikes', 7, '0%', 'P&L', 'Debit'),
+(7330, 'Förmån, fri bil', 7, '0%', 'P&L', 'Debit'),
+(7331, 'Förmån, fri parkering', 7, '0%', 'P&L', 'Debit'),
+(7332, 'Förmån, fri lunch', 7, '0%', 'P&L', 'Debit'),
+(7390, 'Övriga kostnadsersättningar', 7, '0%', 'P&L', 'Debit'),
+(7410, 'Pensionskostnader', 7, '0%', 'P&L', 'Debit'),
+(7460, 'Kostnader för sjukvårdsförsäkring', 7, '0%', 'P&L', 'Debit'),
+(7500, 'Arbetsgivaravgifter', 7, '0%', 'P&L', 'Debit'),
+(7510, 'Lagstadgade arbetsgivaravgifter', 7, '0%', 'P&L', 'Debit'),
+(7519, 'Nedsättning arbetsgivaravgifter', 7, '0%', 'P&L', 'Credit'),
+(7520, 'Särskild löneskatt på pensionskostnader', 7, '0%', 'P&L', 'Debit'),
+(7530, 'Särskild löneskatt på förvärvsinkomster', 7, '0%', 'P&L', 'Debit'),
+(7570, 'Premier för arbetsmarknadsförsäkringar', 7, '0%', 'P&L', 'Debit'),
+(7600, 'Personalrekrytering och kompetensutveckling', 7, '25%', 'P&L', 'Debit'),
+(7610, 'Personalrekrytering', 7, '25%', 'P&L', 'Debit'),
+(7620, 'Utbildning', 7, '25%', 'P&L', 'Debit'),
+(7630, 'Kurser och konferenser', 7, '25%', 'P&L', 'Debit'),
+(7699, 'Övriga personalkostnader', 7, '25%', 'P&L', 'Debit'),
+(7700, 'Friskvård', 7, '25%', 'P&L', 'Debit'),
+(7710, 'Personalvård', 7, '25%', 'P&L', 'Debit'),
+(7810, 'Avskrivning immateriella anläggningstillgångar', 7, '0%', 'P&L', 'Debit'),
+(7820, 'Avskrivning byggnader och mark', 7, '0%', 'P&L', 'Debit'),
+(7830, 'Avskrivning maskiner och inventarier', 7, '0%', 'P&L', 'Debit'),
+(7831, 'Avskrivning inventarier och verktyg', 7, '0%', 'P&L', 'Debit'),
+(7832, 'Avskrivning datorer', 7, '0%', 'P&L', 'Debit')
+
+ON CONFLICT (account_no) DO NOTHING;
+
+-- Group 8: Finansiella poster och extraordinära poster
+INSERT INTO accounts (account_no, account_name, account_group, tax_standard, type, standard_side) VALUES
+(8000, 'Finansiella intäkter', 8, '0%', 'P&L', 'Credit'),
+(8010, 'Ränteintäkter från koncernföretag', 8, '0%', 'P&L', 'Credit'),
+(8020, 'Ränteintäkter från övriga företag', 8, '0%', 'P&L', 'Credit'),
+(8030, 'Ränteintäkter för skattekontot', 8, '0%', 'P&L', 'Credit'),
+(8040, 'Utdelning från koncernföretag', 8, '0%', 'P&L', 'Credit'),
+(8050, 'Utdelning från övriga företag', 8, '0%', 'P&L', 'Credit'),
+(8070, 'Valutakursvinster på finansiella fordringar och skulder', 8, '0%', 'P&L', 'Credit'),
+(8090, 'Övriga finansiella intäkter', 8, '0%', 'P&L', 'Credit'),
+(8100, 'Räntekostnader till koncernföretag', 8, '0%', 'P&L', 'Debit'),
+(8110, 'Räntekostnader för checkräkningskredit', 8, '0%', 'P&L', 'Debit'),
+(8120, 'Räntekostnader för kortfristiga skulder till kreditinstitut', 8, '0%', 'P&L', 'Debit'),
+(8130, 'Räntekostnader för långfristiga skulder till kreditinstitut', 8, '0%', 'P&L', 'Debit'),
+(8140, 'Räntekostnader för skulder till koncernföretag', 8, '0%', 'P&L', 'Debit'),
+(8150, 'Dröjsmålsränta på skatter och avgifter', 8, '0%', 'P&L', 'Debit'),
+(8160, 'Övriga räntekostnader', 8, '0%', 'P&L', 'Debit'),
+(8170, 'Valutakursförluster på finansiella fordringar och skulder', 8, '0%', 'P&L', 'Debit'),
+(8190, 'Övriga finansiella kostnader', 8, '0%', 'P&L', 'Debit'),
+(8200, 'Nedskrivning av finansiella anläggningstillgångar', 8, '0%', 'P&L', 'Debit'),
+(8210, 'Nedskrivning av immateriella anläggningstillgångar', 8, '0%', 'P&L', 'Debit'),
+(8220, 'Nedskrivning av byggnader och mark', 8, '0%', 'P&L', 'Debit'),
+(8230, 'Nedskrivning av maskiner och inventarier', 8, '0%', 'P&L', 'Debit'),
+(8300, 'Erhållna koncernbidrag', 8, '0%', 'P&L', 'Credit'),
+(8310, 'Lämnade koncernbidrag', 8, '0%', 'P&L', 'Debit'),
+(8320, 'Erhållna aktieägartillskott', 8, '0%', 'P&L', 'Credit'),
+(8410, 'Skatt på årets resultat', 8, '0%', 'P&L', 'Debit'),
+(8420, 'Uppskjuten skatt', 8, '0%', 'P&L', 'Debit'),
+(8810, 'Årets resultat', 8, '0%', 'P&L', 'Credit'),
+(8860, 'Vinst från försäljning av dotterföretag', 8, '0%', 'P&L', 'Credit'),
+(8870, 'Förlust från försäljning av dotterföretag', 8, '0%', 'P&L', 'Debit'),
+(8900, 'Periodens resultat', 8, '0%', 'P&L', 'Credit'),
+(8999, 'Årets resultat', 8, '0%', 'P&L', 'Credit')
+
+ON CONFLICT (account_no) DO NOTHING;
+
+-- Verify insertion
+SELECT 'Total accounts inserted:' as message, COUNT(*) as count FROM accounts;
+SELECT 'Accounts by group:' as message, account_group, COUNT(*) as count FROM accounts GROUP BY account_group ORDER BY account_group;

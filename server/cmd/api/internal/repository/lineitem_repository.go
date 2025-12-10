@@ -27,9 +27,10 @@ func NewLineItemRepository(db *sql.DB) LineItemRepository {
 func (r *lineItemRepository) CreateLineItem(lineItem *domain.LineItem) error {
 	query := `
 		INSERT INTO line_items (voucher_id, account_no, debit_amount, credit_amount, tax_code, project_id, cost_center_id)
-		VALUES (?, ?, ?, ?, ?, ?, ?)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING line_id
 	`
-	result, err := r.db.Exec(query,
+	err := r.db.QueryRow(query,
 		lineItem.VoucherID,
 		lineItem.AccountNo,
 		lineItem.DebitAmount,
@@ -37,17 +38,11 @@ func (r *lineItemRepository) CreateLineItem(lineItem *domain.LineItem) error {
 		lineItem.TaxCode,
 		lineItem.ProjectID,
 		lineItem.CostCenterID,
-	)
+	).Scan(&lineItem.LineID)
 	if err != nil {
 		return fmt.Errorf("failed to create line item: %w", err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return fmt.Errorf("failed to get last insert id: %w", err)
-	}
-
-	lineItem.LineID = int(id)
 	return nil
 }
 
@@ -55,7 +50,7 @@ func (r *lineItemRepository) GetLineItemByID(lineID int) (*domain.LineItem, erro
 	query := `
 		SELECT line_id, voucher_id, account_no, debit_amount, credit_amount, tax_code, project_id, cost_center_id
 		FROM line_items
-		WHERE line_id = ?
+		WHERE line_id = $1
 	`
 	lineItem := &domain.LineItem{}
 	err := r.db.QueryRow(query, lineID).Scan(
@@ -82,7 +77,7 @@ func (r *lineItemRepository) GetLineItemsByVoucherID(voucherID int) ([]*domain.L
 	query := `
 		SELECT line_id, voucher_id, account_no, debit_amount, credit_amount, tax_code, project_id, cost_center_id
 		FROM line_items
-		WHERE voucher_id = ?
+		WHERE voucher_id = $1
 		ORDER BY line_id
 	`
 	rows, err := r.db.Query(query, voucherID)
@@ -117,7 +112,7 @@ func (r *lineItemRepository) GetLineItemsByAccountNo(accountNo int) ([]*domain.L
 	query := `
 		SELECT line_id, voucher_id, account_no, debit_amount, credit_amount, tax_code, project_id, cost_center_id
 		FROM line_items
-		WHERE account_no = ?
+		WHERE account_no = $1
 		ORDER BY line_id
 	`
 	rows, err := r.db.Query(query, accountNo)
@@ -151,8 +146,8 @@ func (r *lineItemRepository) GetLineItemsByAccountNo(accountNo int) ([]*domain.L
 func (r *lineItemRepository) UpdateLineItem(lineItem *domain.LineItem) error {
 	query := `
 		UPDATE line_items
-		SET voucher_id = ?, account_no = ?, debit_amount = ?, credit_amount = ?, tax_code = ?, project_id = ?, cost_center_id = ?
-		WHERE line_id = ?
+		SET voucher_id = $1, account_no = $2, debit_amount = $3, credit_amount = $4, tax_code = $5, project_id = $6, cost_center_id = $7
+		WHERE line_id = $8
 	`
 	_, err := r.db.Exec(query,
 		lineItem.VoucherID,
@@ -172,7 +167,7 @@ func (r *lineItemRepository) UpdateLineItem(lineItem *domain.LineItem) error {
 }
 
 func (r *lineItemRepository) DeleteLineItem(lineID int) error {
-	query := `DELETE FROM line_items WHERE line_id = ?`
+	query := `DELETE FROM line_items WHERE line_id = $1`
 	_, err := r.db.Exec(query, lineID)
 	if err != nil {
 		return fmt.Errorf("failed to delete line item: %w", err)
@@ -182,7 +177,7 @@ func (r *lineItemRepository) DeleteLineItem(lineID int) error {
 }
 
 func (r *lineItemRepository) DeleteLineItemsByVoucherID(voucherID int) error {
-	query := `DELETE FROM line_items WHERE voucher_id = ?`
+	query := `DELETE FROM line_items WHERE voucher_id = $1`
 	_, err := r.db.Exec(query, voucherID)
 	if err != nil {
 		return fmt.Errorf("failed to delete line items by voucher: %w", err)

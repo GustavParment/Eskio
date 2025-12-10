@@ -27,26 +27,21 @@ func NewVoucherRepository(db *sql.DB) VoucherRepository {
 func (r *voucherRepository) CreateVoucher(voucher *domain.Voucher) error {
 	query := `
 		INSERT INTO vouchers (date, description, reference, total_amount, period, created_by)
-		VALUES (?, ?, ?, ?, ?, ?)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING voucher_id
 	`
-	result, err := r.db.Exec(query,
+	err := r.db.QueryRow(query,
 		voucher.Date,
 		voucher.Description,
 		voucher.Reference,
 		voucher.TotalAmount,
 		voucher.Period,
 		voucher.CreatedBy,
-	)
+	).Scan(&voucher.VoucherID)
 	if err != nil {
 		return fmt.Errorf("failed to create voucher: %w", err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return fmt.Errorf("failed to get last insert id: %w", err)
-	}
-
-	voucher.VoucherID = int(id)
 	return nil
 }
 
@@ -54,7 +49,7 @@ func (r *voucherRepository) GetVoucherByID(voucherID int) (*domain.Voucher, erro
 	query := `
 		SELECT voucher_id, date, description, reference, total_amount, period, created_by
 		FROM vouchers
-		WHERE voucher_id = ?
+		WHERE voucher_id = $1
 	`
 	voucher := &domain.Voucher{}
 	err := r.db.QueryRow(query, voucherID).Scan(
@@ -113,7 +108,7 @@ func (r *voucherRepository) GetVouchersByPeriod(period string) ([]*domain.Vouche
 	query := `
 		SELECT voucher_id, date, description, reference, total_amount, period, created_by
 		FROM vouchers
-		WHERE period = ?
+		WHERE period = $1
 		ORDER BY date DESC, voucher_id DESC
 	`
 	rows, err := r.db.Query(query, period)
@@ -147,7 +142,7 @@ func (r *voucherRepository) GetVouchersByCreatedBy(userID int) ([]*domain.Vouche
 	query := `
 		SELECT voucher_id, date, description, reference, total_amount, period, created_by
 		FROM vouchers
-		WHERE created_by = ?
+		WHERE created_by = $1
 		ORDER BY date DESC, voucher_id DESC
 	`
 	rows, err := r.db.Query(query, userID)
@@ -180,8 +175,8 @@ func (r *voucherRepository) GetVouchersByCreatedBy(userID int) ([]*domain.Vouche
 func (r *voucherRepository) UpdateVoucher(voucher *domain.Voucher) error {
 	query := `
 		UPDATE vouchers
-		SET date = ?, description = ?, reference = ?, total_amount = ?, period = ?, created_by = ?
-		WHERE voucher_id = ?
+		SET date = $1, description = $2, reference = $3, total_amount = $4, period = $5, created_by = $6
+		WHERE voucher_id = $7
 	`
 	_, err := r.db.Exec(query,
 		voucher.Date,
@@ -200,7 +195,7 @@ func (r *voucherRepository) UpdateVoucher(voucher *domain.Voucher) error {
 }
 
 func (r *voucherRepository) DeleteVoucher(voucherID int) error {
-	query := `DELETE FROM vouchers WHERE voucher_id = ?`
+	query := `DELETE FROM vouchers WHERE voucher_id = $1`
 	_, err := r.db.Exec(query, voucherID)
 	if err != nil {
 		return fmt.Errorf("failed to delete voucher: %w", err)

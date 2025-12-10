@@ -107,6 +107,7 @@ export interface CreateVoucherRequest {
   reference: string;
   total_amount: number;
   period: string;
+  created_by: number;
   lines?: CreateLineItemRequest[];
 }
 
