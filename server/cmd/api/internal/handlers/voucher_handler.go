@@ -33,10 +33,7 @@ func (h *VoucherHandler) CreateVoucher(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "voucher created successfully",
-		"voucher": voucher,
-	})
+	c.JSON(http.StatusCreated, voucher)
 }
 
 // GetVoucherByID handles GET /vouchers/:id
@@ -78,11 +75,7 @@ func (h *VoucherHandler) GetVouchersByPeriod(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"vouchers": vouchers,
-		"period":   period,
-		"count":    len(vouchers),
-	})
+	c.JSON(http.StatusOK, vouchers)
 }
 
 // GetVouchersByCreatedBy handles GET /vouchers/user/:userId

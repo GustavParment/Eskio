@@ -8,6 +8,7 @@ import { accountsApi } from "@/lib/api/accounts";
 import { lineItemsApi } from "@/lib/api/lineitems";
 import { Account, CreateLineItemRequest } from "@/types";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import AccountSearch from "@/components/ui/AccountSearch";
 
 interface LineItemForm {
   id: string;
@@ -266,19 +267,13 @@ export default function NewVoucherPage() {
                 <tbody>
                   {lineItems.map((item, index) => (
                     <tr key={item.id} className="border-b border-gray-100">
-                      <td className="py-3 px-2">
-                        <select
+                      <td className="py-3 px-2 min-w-[280px]">
+                        <AccountSearch
+                          accounts={accounts}
                           value={item.account_no}
-                          onChange={(e) => updateLineItem(item.id, "account_no", e.target.value)}
-                          className="w-full px-2 py-2 border border-gray-300 rounded text-sm text-black focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Välj konto...</option>
-                          {accounts.map((account) => (
-                            <option key={account.account_no} value={account.account_no}>
-                              {account.account_no} - {account.account_name}
-                            </option>
-                          ))}
-                        </select>
+                          onChange={(accountNo) => updateLineItem(item.id, "account_no", accountNo)}
+                          placeholder="Sök konto..."
+                        />
                       </td>
                       <td className="py-3 px-2">
                         <input

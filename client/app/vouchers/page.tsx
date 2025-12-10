@@ -25,7 +25,7 @@ export default function VouchersPage() {
       const data = currentPeriod
         ? await vouchersApi.getByPeriod(currentPeriod)
         : await vouchersApi.getAll();
-      setVouchers(data);
+      setVouchers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to fetch vouchers:", error);
     } finally {

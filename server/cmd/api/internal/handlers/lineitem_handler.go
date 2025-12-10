@@ -33,10 +33,7 @@ func (h *LineItemHandler) CreateLineItem(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message":  "line item created successfully",
-		"lineItem": lineItem,
-	})
+	c.JSON(http.StatusCreated, lineItem)
 }
 
 // GetLineItemByID handles GET /lineitems/:id
@@ -72,11 +69,7 @@ func (h *LineItemHandler) GetLineItemsByVoucherID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"lineItems": lineItems,
-		"voucherId": voucherID,
-		"count":     len(lineItems),
-	})
+	c.JSON(http.StatusOK, lineItems)
 }
 
 // GetLineItemsByAccountNo handles GET /lineitems/account/:accountNo
@@ -94,11 +87,7 @@ func (h *LineItemHandler) GetLineItemsByAccountNo(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"lineItems": lineItems,
-		"accountNo": accountNo,
-		"count":     len(lineItems),
-	})
+	c.JSON(http.StatusOK, lineItems)
 }
 
 // UpdateLineItem handles PUT /lineitems/:id

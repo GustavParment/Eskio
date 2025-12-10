@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Eskio Startup Script
 # Starts the database, backend server, and frontend client
 
@@ -49,7 +48,7 @@ echo "✨ Eskio is now running!"
 echo ""
 echo "📱 Frontend:  http://localhost:3000"
 echo "🔌 Backend:   http://localhost:8080"
-echo "🗄️  Database:  postgres://localhost:5433"
+echo "🗄️  Database:  postgres://localhost:5432"
 echo ""
 echo "To stop all services, run: ./stop.sh"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
