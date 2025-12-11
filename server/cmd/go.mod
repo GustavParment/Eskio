@@ -2,7 +2,10 @@ module cmd
 
 go 1.25.4
 
-require golang.org/x/crypto v0.45.0
+require (
+	github.com/go-pdf/fpdf v0.9.0
+	golang.org/x/crypto v0.45.0
+)
 
 require (
 	github.com/bytedance/gopkg v0.1.3 // indirect

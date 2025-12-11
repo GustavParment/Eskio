@@ -162,3 +162,30 @@ func (h *VoucherHandler) ValidateVoucherBalance(c *gin.Context) {
 		"message":   map[bool]string{true: "Voucher is balanced", false: "Voucher is NOT balanced"}[balanced],
 	})
 }
+
+// CreateCorrectionVoucher handles POST /vouchers/:id/correct
+func (h *VoucherHandler) CreateCorrectionVoucher(c *gin.Context) {
+	idParam := c.Param("id")
+	voucherID, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid voucher ID"})
+		return
+	}
+
+	// Get user ID from request body
+	var req struct {
+		UserID int `json:"user_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+		return
+	}
+
+	correctionVoucher, err := h.voucherService.CreateCorrectionVoucher(voucherID, req.UserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, correctionVoucher)
+}

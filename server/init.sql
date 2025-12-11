@@ -41,9 +41,13 @@ CREATE TABLE IF NOT EXISTS vouchers (
     total_amount DECIMAL(15, 2) NOT NULL,
     period VARCHAR(7) NOT NULL,
     created_by INT NOT NULL,
+    corrects_voucher_id INT NULL,
+    corrected_by_voucher_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE RESTRICT
+    FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE RESTRICT,
+    FOREIGN KEY (corrects_voucher_id) REFERENCES vouchers(voucher_id) ON DELETE SET NULL,
+    FOREIGN KEY (corrected_by_voucher_id) REFERENCES vouchers(voucher_id) ON DELETE SET NULL
 );
 
 CREATE INDEX idx_vouchers_period ON vouchers(period);
@@ -73,6 +77,12 @@ CREATE TABLE IF NOT EXISTS line_items (
 
 CREATE INDEX idx_line_items_voucher ON line_items(voucher_id);
 CREATE INDEX idx_line_items_account ON line_items(account_no);
+
+-- Insert default users
+-- Password for both users is: Password123
+INSERT INTO users (name, email, password_hash, role) VALUES
+('Admin', 'admin@eskio.se', '$2a$10$Cs8h5LLIFMsFN3rWiR0zp.CCFrkzc1.3Kn6IY5QLNVqjx6sx6Srn6', 'Admin'),
+('Test User', 'test@gmail.com', '$2a$10$Cs8h5LLIFMsFN3rWiR0zp.CCFrkzc1.3Kn6IY5QLNVqjx6sx6Srn6', 'Bookkeeper');
 
 -- Insert standard Swedish BAS accounts
 INSERT INTO accounts (account_no, account_name, account_group, tax_standard, type, standard_side) VALUES

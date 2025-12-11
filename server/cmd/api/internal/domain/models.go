@@ -66,15 +66,17 @@ type LineItem struct {
 }
 
 type Voucher struct {
-    VoucherID     int          `json:"voucher_id"`     // Unikt ID
-    VoucherNumber int          `json:"voucher_number"` // Löpnummer för verifikat (1, 2, 3...)
-    Date          FlexibleDate `json:"date"`           // Datum då händelsen inträffade
-    Description   string       `json:"description"`    // Beskrivning av transaktionen
-    Reference     string       `json:"reference"`      // Fakturanummer, kvitto-ID, etc.
-    TotalAmount   float64      `json:"total_amount"`   // Totalbelopp
-    Period        string       `json:"period"`         // Period (t.ex. "2025-01")
-    CreatedBy     int          `json:"created_by"`     // Foreign Key till UserID
-    Lines         []LineItem   `json:"lines"`          // Lista över Verifikatraderna
+    VoucherID            int          `json:"voucher_id"`              // Unikt ID
+    VoucherNumber        int          `json:"voucher_number"`          // Löpnummer för verifikat (1, 2, 3...)
+    Date                 FlexibleDate `json:"date"`                    // Datum då händelsen inträffade
+    Description          string       `json:"description"`             // Beskrivning av transaktionen
+    Reference            string       `json:"reference"`               // Fakturanummer, kvitto-ID, etc.
+    TotalAmount          float64      `json:"total_amount"`            // Totalbelopp
+    Period               string       `json:"period"`                  // Period (t.ex. "2025-01")
+    CreatedBy            int          `json:"created_by"`              // Foreign Key till UserID
+    CorrectsVoucherID    *int         `json:"corrects_voucher_id"`     // ID för verifikat som detta rättar
+    CorrectedByVoucherID *int         `json:"corrected_by_voucher_id"` // ID för verifikat som rättat detta
+    Lines                []LineItem   `json:"lines"`                   // Lista över Verifikatraderna
 }
 
 type LedgerEntry struct {

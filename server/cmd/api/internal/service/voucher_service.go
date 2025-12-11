@@ -206,3 +206,69 @@ func (s *VoucherService) ValidateVoucherBalance(voucherID int) (bool, error) {
 
 	return balanced, nil
 }
+
+// CreateCorrectionVoucher creates a correction voucher that reverses the original voucher
+func (s *VoucherService) CreateCorrectionVoucher(originalVoucherID int, userID int) (*domain.Voucher, error) {
+	if originalVoucherID <= 0 {
+		return nil, errors.New("invalid voucher ID")
+	}
+	if userID <= 0 {
+		return nil, errors.New("invalid user ID")
+	}
+
+	// Get the original voucher
+	originalVoucher, err := s.repository.GetVoucherByID(originalVoucherID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get original voucher: %w", err)
+	}
+
+	// Check if voucher is already corrected
+	if originalVoucher.CorrectedByVoucherID != nil {
+		return nil, errors.New("voucher has already been corrected")
+	}
+
+	// Get original line items
+	originalLineItems, err := s.lineItemRepository.GetLineItemsByVoucherID(originalVoucherID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get original line items: %w", err)
+	}
+
+	// Create correction voucher with reversed amounts
+	correctionVoucher := &domain.Voucher{
+		Date:        domain.FlexibleDate{Time: originalVoucher.Date.Time},
+		Description: fmt.Sprintf("Rättelse av verifikat #%d: %s", originalVoucher.VoucherNumber, originalVoucher.Description),
+		Reference:   originalVoucher.Reference,
+		TotalAmount: originalVoucher.TotalAmount,
+		Period:      originalVoucher.Period,
+		CreatedBy:   userID,
+	}
+
+	// Create the correction voucher in database
+	err = s.repository.CreateCorrectionVoucher(correctionVoucher, originalVoucherID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create correction voucher: %w", err)
+	}
+
+	// Create reversed line items (swap debit and credit)
+	for _, item := range originalLineItems {
+		reversedItem := &domain.LineItem{
+			VoucherID:    correctionVoucher.VoucherID,
+			AccountNo:    item.AccountNo,
+			DebitAmount:  item.CreditAmount,  // Swap: original credit becomes debit
+			CreditAmount: item.DebitAmount,   // Swap: original debit becomes credit
+			TaxCode:      item.TaxCode,
+		}
+		err = s.lineItemRepository.CreateLineItem(reversedItem)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create correction line item: %w", err)
+		}
+	}
+
+	// Mark the original voucher as corrected
+	err = s.repository.MarkVoucherAsCorrected(originalVoucherID, correctionVoucher.VoucherID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to mark original voucher as corrected: %w", err)
+	}
+
+	return correctionVoucher, nil
+}

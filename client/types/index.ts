@@ -97,6 +97,8 @@ export interface Voucher {
   total_amount: number;
   period: string; // YYYY-MM
   created_by: number;
+  corrects_voucher_id?: number | null;     // ID för verifikat som detta rättar
+  corrected_by_voucher_id?: number | null; // ID för verifikat som rättat detta
   created_at: string;
   updated_at: string;
   lines?: LineItem[]; // Populated in detail responses

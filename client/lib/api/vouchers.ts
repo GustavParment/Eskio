@@ -33,4 +33,18 @@ export const vouchersApi = {
   delete: async (id: number): Promise<void> => {
     return apiClient.delete<void>(`/vouchers/${id}`);
   },
+
+  createCorrection: async (id: number, userId: number): Promise<Voucher> => {
+    return apiClient.post<Voucher>(`/vouchers/${id}/correct`, { user_id: userId });
+  },
+
+  getPdf: async (id: number): Promise<Blob> => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1"}/vouchers/${id}/pdf`, {
+      credentials: "include",
+    });
+    if (!response.ok) {
+      throw new Error("Failed to download PDF");
+    }
+    return response.blob();
+  },
 };

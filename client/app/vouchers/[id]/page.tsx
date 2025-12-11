@@ -7,18 +7,25 @@ import { vouchersApi } from "@/lib/api/vouchers";
 import { lineItemsApi } from "@/lib/api/lineitems";
 import { accountsApi } from "@/lib/api/accounts";
 import { Voucher, LineItem, Account } from "@/types";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import Link from "next/link";
 
 export default function VoucherDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const voucherId = Number(params.id);
 
   const [voucher, setVoucher] = useState<Voucher | null>(null);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [accounts, setAccounts] = useState<Record<number, Account>>({});
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const isAdmin = user?.role === "Admin";
+  const isCorrected = voucher?.corrected_by_voucher_id != null;
+  const isCorrection = voucher?.corrects_voucher_id != null;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,6 +56,42 @@ export default function VoucherDetailPage() {
       fetchData();
     }
   }, [voucherId]);
+
+  const handleDownloadPdf = async () => {
+    if (!voucher) return;
+    setActionLoading(true);
+    try {
+      const blob = await vouchersApi.getPdf(voucher.voucher_id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `verifikat_${voucher.voucher_number}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      setError("Kunde inte ladda ner PDF");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCreateCorrection = async () => {
+    if (!voucher || !user) return;
+    if (!confirm("Vill du skapa ett rättelseverifikat? Detta kommer att reversera alla belopp i det ursprungliga verifikatet.")) {
+      return;
+    }
+    setActionLoading(true);
+    try {
+      const correctionVoucher = await vouchersApi.createCorrection(voucher.voucher_id, user.user_id);
+      router.push(`/vouchers/${correctionVoucher.voucher_id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Kunde inte skapa rättelseverifikat");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const totalDebit = lineItems.reduce((sum, item) => sum + (item.debit_amount || 0), 0);
   const totalCredit = lineItems.reduce((sum, item) => sum + (item.credit_amount || 0), 0);
@@ -94,20 +137,74 @@ export default function VoucherDetailPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Verifikat #{voucher.voucher_id}
+                Verifikat #{voucher.voucher_number}
               </h1>
               <p className="text-gray-600 mt-2">{voucher.description}</p>
             </div>
             <div className="flex gap-3">
-              <Link
-                href={`/vouchers/${voucher.voucher_id}/edit`}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              <button
+                onClick={handleDownloadPdf}
+                disabled={actionLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
               >
-                Redigera
-              </Link>
+                Ladda ner PDF
+              </button>
+              {!isCorrected && !isCorrection && (
+                <button
+                  onClick={handleCreateCorrection}
+                  disabled={actionLoading}
+                  className="px-4 py-2 border border-orange-500 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors font-medium disabled:opacity-50"
+                >
+                  Skapa rättelse
+                </button>
+              )}
+              {isAdmin && (
+                <Link
+                  href={`/vouchers/${voucher.voucher_id}/edit`}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Redigera
+                </Link>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Correction warnings */}
+        {isCorrected && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700 font-medium">
+              Detta verifikat har rättats av{" "}
+              <Link
+                href={`/vouchers/${voucher.corrected_by_voucher_id}`}
+                className="underline hover:text-red-800"
+              >
+                verifikat #{voucher.corrected_by_voucher_id}
+              </Link>
+            </p>
+          </div>
+        )}
+
+        {isCorrection && (
+          <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <p className="text-orange-700 font-medium">
+              Detta är ett rättelseverifikat för{" "}
+              <Link
+                href={`/vouchers/${voucher.corrects_voucher_id}`}
+                className="underline hover:text-orange-800"
+              >
+                verifikat #{voucher.corrects_voucher_id}
+              </Link>
+            </p>
+          </div>
+        )}
+
+        {/* Error message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
 
         {/* Voucher Info Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">

@@ -40,6 +40,7 @@ func main() {
 	lineItemHandler := handlers.NewLineItemHandler(lineItemService)
 	voucherHandler := handlers.NewVoucherHandler(voucherService)
 	authHandler := handlers.NewAuthHandler(userService, jwtManager)
+	pdfHandler := handlers.NewPDFHandler(voucherService, accountService)
 
 	authMiddleware := middleware.AuthMiddleware(jwtManager)
 
@@ -48,7 +49,7 @@ func main() {
 	// Add CORS middleware
 	router.Use(middleware.CORSMiddleware())
 
-	routes.SetupRoutes(router, userHandler, accountHandler, lineItemHandler, voucherHandler, authHandler, authMiddleware)
+	routes.SetupRoutes(router, userHandler, accountHandler, lineItemHandler, voucherHandler, authHandler, pdfHandler, authMiddleware)
 
 	log.Println("Starting server on", cfg.ServerPort)
 	if err := router.Run(cfg.ServerPort); err != nil {

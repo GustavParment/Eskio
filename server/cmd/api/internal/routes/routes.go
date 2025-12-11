@@ -2,6 +2,7 @@ package routes
 
 import (
 	"cmd/api/internal/handlers"
+	"cmd/api/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +14,7 @@ func SetupRoutes(
 	lineItemHandler *handlers.LineItemHandler,
 	voucherHandler *handlers.VoucherHandler,
 	authHandler *handlers.AuthHandler,
+	pdfHandler *handlers.PDFHandler,
 	authMiddleware gin.HandlerFunc) {
 
 	v1 := router.Group("/api/v1")
@@ -64,8 +66,11 @@ func SetupRoutes(
 			vouchers.GET("/period/:period", voucherHandler.GetVouchersByPeriod)
 			vouchers.GET("/user/:userId", voucherHandler.GetVouchersByCreatedBy)
 			vouchers.GET("/:id/validate", voucherHandler.ValidateVoucherBalance)
-			vouchers.PUT("/:id", voucherHandler.UpdateVoucher)
-			vouchers.DELETE("/:id", voucherHandler.DeleteVoucher)
+			vouchers.POST("/:id/correct", voucherHandler.CreateCorrectionVoucher)
+			vouchers.GET("/:id/pdf", pdfHandler.GenerateVoucherPDF)
+			// Only Admin can update or delete vouchers
+			vouchers.PUT("/:id", middleware.RequireRole("Admin"), voucherHandler.UpdateVoucher)
+			vouchers.DELETE("/:id", middleware.RequireRole("Admin"), voucherHandler.DeleteVoucher)
 		}
 	}
 }
