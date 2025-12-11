@@ -1,4 +1,4 @@
-import { Account, CreateAccountRequest, UpdateAccountRequest } from "@/types";
+import { Account, CreateAccountRequest, UpdateAccountRequest, LedgerEntry } from "@/types";
 import { apiClient } from "./client";
 
 export const accountsApi = {
@@ -12,6 +12,13 @@ export const accountsApi = {
 
   getByGroup: async (group: number): Promise<Account[]> => {
     return apiClient.get<Account[]>(`/accounts/group/${group}`);
+  },
+
+  getLedger: async (accountNo: number, period?: string): Promise<LedgerEntry[]> => {
+    const url = period
+      ? `/accounts/${accountNo}/ledger?period=${period}`
+      : `/accounts/${accountNo}/ledger`;
+    return apiClient.get<LedgerEntry[]>(url);
   },
 
   create: async (data: CreateAccountRequest): Promise<Account> => {

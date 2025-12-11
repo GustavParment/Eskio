@@ -15,14 +15,17 @@ if [ -f "$SCRIPT_DIR/.backend.pid" ]; then
     if ps -p $BACKEND_PID > /dev/null 2>&1; then
         echo "🔧 Stopping backend server (PID: $BACKEND_PID)..."
         kill $BACKEND_PID
-        echo "✅ Backend stopped"
     else
-        echo "⚠️  Backend process not found"
+        echo "⚠️  Backend process not found in PID file"
     fi
     rm "$SCRIPT_DIR/.backend.pid"
 else
     echo "⚠️  No backend PID file found"
 fi
+
+# Kill any remaining Go API processes
+pkill -f "go run api/main.go" 2>/dev/null && echo "  ✓ Killed Go API processes"
+echo "✅ Backend stopped"
 echo ""
 
 # Stop frontend
@@ -31,14 +34,20 @@ if [ -f "$SCRIPT_DIR/.frontend.pid" ]; then
     if ps -p $FRONTEND_PID > /dev/null 2>&1; then
         echo "⚛️  Stopping frontend server (PID: $FRONTEND_PID)..."
         kill $FRONTEND_PID
-        echo "✅ Frontend stopped"
     else
-        echo "⚠️  Frontend process not found"
+        echo "⚠️  Frontend process not found in PID file"
     fi
     rm "$SCRIPT_DIR/.frontend.pid"
 else
     echo "⚠️  No frontend PID file found"
 fi
+
+# Kill any remaining Next.js processes
+echo "🧹 Cleaning up any remaining Next.js processes..."
+pkill -f "next-server" 2>/dev/null && echo "  ✓ Killed next-server processes"
+pkill -f "node.*next.*dev" 2>/dev/null && echo "  ✓ Killed Next.js dev processes"
+pkill -f "postcss" 2>/dev/null && echo "  ✓ Killed PostCSS processes"
+echo "✅ Frontend stopped"
 echo ""
 
 # Optionally stop PostgreSQL container

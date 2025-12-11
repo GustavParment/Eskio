@@ -93,11 +93,7 @@ func (h *VoucherHandler) GetVouchersByCreatedBy(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"vouchers": vouchers,
-		"userId":   userID,
-		"count":    len(vouchers),
-	})
+	c.JSON(http.StatusOK, vouchers)
 }
 
 // UpdateVoucher handles PUT /vouchers/:id

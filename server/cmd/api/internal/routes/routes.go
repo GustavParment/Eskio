@@ -40,6 +40,7 @@ func SetupRoutes(
 			accounts.POST("", accountHandler.CreateAccount)
 			accounts.GET("", accountHandler.GetAllAccounts)
 			accounts.GET("/:accountNo", accountHandler.GetAccountByNo)
+			accounts.GET("/:accountNo/ledger", accountHandler.GetAccountLedger)
 			accounts.GET("/group/:group", accountHandler.GetAccountsByGroup)
 			accounts.PUT("/:accountNo", accountHandler.UpdateAccount)
 			accounts.DELETE("/:accountNo", accountHandler.DeleteAccount)

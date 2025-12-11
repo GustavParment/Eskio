@@ -90,6 +90,7 @@ export interface UpdateLineItemRequest {
 // Voucher types
 export interface Voucher {
   voucher_id: number;
+  voucher_number: number;
   date: string;
   description: string;
   reference: string;
@@ -171,4 +172,16 @@ export interface VoucherFilters extends PaginationParams {
   user_id?: number;
   from_date?: string;
   to_date?: string;
+}
+
+// Ledger types
+export interface LedgerEntry {
+  date: string;
+  voucher_id: number;
+  voucher_number: number;
+  description: string;
+  reference: string;
+  debit_amount: number;
+  credit_amount: number;
+  balance: number;
 }

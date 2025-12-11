@@ -5,9 +5,11 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { vouchersApi } from "@/lib/api/vouchers";
 import { accountsApi } from "@/lib/api/accounts";
 import { Voucher, Account } from "@/types";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import Link from "next/link";
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,14 +20,25 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       try {
+        // Only fetch user's own vouchers (or all if Admin)
+        const vouchersPromise = user.role === "Admin"
+          ? vouchersApi.getAll()
+          : vouchersApi.getByUser(user.user_id);
+
         const [vouchersData, accountsData] = await Promise.all([
-          vouchersApi.getAll(),
+          vouchersPromise,
           accountsApi.getAll(),
         ]);
         // Handle null/undefined responses by defaulting to empty arrays
-        setVouchers((vouchersData || []).slice(0, 5)); // Latest 5 vouchers
-        setAccounts(accountsData || []);
+        const vouchersArray = Array.isArray(vouchersData) ? vouchersData : [];
+        setVouchers(vouchersArray.slice(0, 5)); // Latest 5 vouchers
+        setAccounts(Array.isArray(accountsData) ? accountsData : []);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       } finally {
@@ -34,7 +47,7 @@ export default function DashboardPage() {
     };
 
     fetchData();
-  }, []);
+  }, [user?.user_id, user?.role]);
 
   const stats = [
     { name: "Verifikat denna månad", value: vouchers.length, icon: "📝", color: "bg-blue-500" },
@@ -105,7 +118,7 @@ export default function DashboardPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">ID</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Nr</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Datum</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Beskrivning</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Referens</th>
@@ -115,7 +128,7 @@ export default function DashboardPage() {
               <tbody>
                 {vouchers.map((voucher) => (
                   <tr key={voucher.voucher_id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 text-sm text-gray-900">{voucher.voucher_id}</td>
+                    <td className="py-3 px-4 text-sm font-semibold text-blue-600">#{voucher.voucher_number}</td>
                     <td className="py-3 px-4 text-sm text-gray-600">
                       {new Date(voucher.date).toLocaleDateString("sv-SE")}
                     </td>

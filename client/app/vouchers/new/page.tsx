@@ -118,14 +118,12 @@ export default function NewVoucherPage() {
       }
 
       // Create voucher
-      const date = new Date(formData.date);
-      const period = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-
-      // Convert date to ISO string format (YYYY-MM-DDTHH:mm:ssZ) that backend expects
-      const dateISO = new Date(formData.date + 'T00:00:00').toISOString();
+      // Extract period from date string (YYYY-MM-DD)
+      const [year, month] = formData.date.split('-');
+      const period = `${year}-${month}`;
 
       const voucher = await vouchersApi.create({
-        date: dateISO,
+        date: formData.date, // Send as simple date string (YYYY-MM-DD)
         description: formData.description,
         reference: formData.reference,
         total_amount: totalDebit,

@@ -5,11 +5,10 @@
             "previewLimit": 50,
             "server": "localhost",
             "port": 5433,
-            "askForPassword": true,
             "driver": "PostgreSQL",
-            "name": "bookkeeping",
+            "username": "postgres",
             "database": "bookkeeping",
-            "username": "postgres"
+            "name": "bookkeeping"
         }
     ]
 }

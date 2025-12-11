@@ -154,12 +154,18 @@ export default function AccountsPage() {
                     </td>
                     <td className="py-4 px-6 text-sm text-gray-600">{account.standard_side}</td>
                     <td className="py-4 px-6 text-sm text-gray-600">{account.tax_standard}</td>
-                    <td className="py-4 px-6 text-sm text-right">
+                    <td className="py-4 px-6 text-sm text-right space-x-4">
                       <Link
-                        href={`/accounts/${account.account_no}`}
+                        href={`/accounts/${account.account_no}/ledger`}
                         className="text-blue-600 hover:text-blue-700 font-medium"
                       >
-                        Visa →
+                        Kontoutdrag
+                      </Link>
+                      <Link
+                        href={`/accounts/${account.account_no}`}
+                        className="text-gray-600 hover:text-gray-700 font-medium"
+                      >
+                        Redigera →
                       </Link>
                     </td>
                   </tr>

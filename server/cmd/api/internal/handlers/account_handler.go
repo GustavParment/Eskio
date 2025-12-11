@@ -134,3 +134,24 @@ func (h *AccountHandler) DeleteAccount(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "account deleted successfully"})
 }
+
+// GetAccountLedger handles GET /accounts/:accountNo/ledger
+func (h *AccountHandler) GetAccountLedger(c *gin.Context) {
+	accountNoParam := c.Param("accountNo")
+	accountNo, err := strconv.Atoi(accountNoParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid account number"})
+		return
+	}
+
+	// Get period from query parameter (optional)
+	period := c.Query("period")
+
+	entries, err := h.accountService.GetLedger(accountNo, period)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, entries)
+}

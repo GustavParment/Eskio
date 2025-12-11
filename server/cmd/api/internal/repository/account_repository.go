@@ -13,6 +13,7 @@ type AccountRepository interface {
 	GetAccountsByGroup(accountGroup int) ([]*domain.Account, error)
 	UpdateAccount(account *domain.Account) error
 	DeleteAccount(accountNo int) error
+	GetLedger(accountNo int, period string) ([]*domain.LedgerEntry, error)
 }
 
 type accountRepository struct {
@@ -162,4 +163,55 @@ func (r *accountRepository) DeleteAccount(accountNo int) error {
 	}
 
 	return nil
+}
+
+func (r *accountRepository) GetLedger(accountNo int, period string) ([]*domain.LedgerEntry, error) {
+	query := `
+		SELECT
+			v.date,
+			v.voucher_id,
+			v.voucher_number,
+			v.description,
+			v.reference,
+			l.debit_amount,
+			l.credit_amount
+		FROM line_items l
+		INNER JOIN vouchers v ON l.voucher_id = v.voucher_id
+		WHERE l.account_no = $1
+			AND ($2 = '' OR v.period = $2)
+		ORDER BY v.date ASC, v.voucher_number ASC
+	`
+
+	rows, err := r.db.Query(query, accountNo, period)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get ledger entries: %w", err)
+	}
+	defer rows.Close()
+
+	entries := make([]*domain.LedgerEntry, 0)
+	var runningBalance float64 = 0
+
+	for rows.Next() {
+		entry := &domain.LedgerEntry{}
+		err := rows.Scan(
+			&entry.Date.Time,
+			&entry.VoucherID,
+			&entry.VoucherNumber,
+			&entry.Description,
+			&entry.Reference,
+			&entry.DebitAmount,
+			&entry.CreditAmount,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan ledger entry: %w", err)
+		}
+
+		// Calculate running balance (Debit increases, Credit decreases)
+		runningBalance += entry.DebitAmount - entry.CreditAmount
+		entry.Balance = runningBalance
+
+		entries = append(entries, entry)
+	}
+
+	return entries, nil
 }

@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { vouchersApi } from "@/lib/api/vouchers";
 import { Voucher } from "@/types";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import Link from "next/link";
 
 export default function VouchersPage() {
+  const { user } = useAuth();
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,15 +18,31 @@ export default function VouchersPage() {
   });
 
   useEffect(() => {
-    fetchVouchers();
-  }, [currentPeriod]);
+    if (user) {
+      fetchVouchers();
+    }
+  }, [currentPeriod, user]);
 
   const fetchVouchers = async () => {
+    if (!user) return;
+
     setLoading(true);
     try {
-      const data = currentPeriod
-        ? await vouchersApi.getByPeriod(currentPeriod)
-        : await vouchersApi.getAll();
+      let data: Voucher[];
+
+      // Admin can see all vouchers, others only their own
+      if (user.role === "Admin") {
+        data = currentPeriod
+          ? await vouchersApi.getByPeriod(currentPeriod)
+          : await vouchersApi.getAll();
+      } else {
+        // For non-admin users, get their vouchers and filter by period
+        const allUserVouchers = await vouchersApi.getByUser(user.user_id);
+        data = currentPeriod
+          ? allUserVouchers.filter(v => v.period === currentPeriod)
+          : allUserVouchers;
+      }
+
       setVouchers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to fetch vouchers:", error);
@@ -146,8 +164,8 @@ export default function VouchersPage() {
               <tbody className="divide-y divide-gray-100">
                 {filteredVouchers.map((voucher) => (
                   <tr key={voucher.voucher_id} className="hover:bg-gray-50">
-                    <td className="py-4 px-6 text-sm font-medium text-gray-900">
-                      {voucher.voucher_id}
+                    <td className="py-4 px-6 text-sm font-semibold text-blue-600">
+                      #{voucher.voucher_number}
                     </td>
                     <td className="py-4 px-6 text-sm text-gray-600">
                       {new Date(voucher.date).toLocaleDateString("sv-SE")}

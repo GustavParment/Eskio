@@ -159,3 +159,27 @@ func (s *AccountService) DeleteAccount(accountNo int) error {
 
 	return nil
 }
+
+// GetLedger retrieves ledger entries for an account
+func (s *AccountService) GetLedger(accountNo int, period string) ([]*domain.LedgerEntry, error) {
+	if accountNo <= 0 {
+		return nil, errors.New("invalid account number")
+	}
+
+	// Check if account exists
+	existingAccount, err := s.repository.GetAccountByNo(accountNo)
+	if err != nil {
+		return nil, fmt.Errorf("account not found: %w", err)
+	}
+	if existingAccount == nil {
+		return nil, errors.New("account not found")
+	}
+
+	// Get ledger entries
+	entries, err := s.repository.GetLedger(accountNo, period)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get ledger: %w", err)
+	}
+
+	return entries, nil
+}

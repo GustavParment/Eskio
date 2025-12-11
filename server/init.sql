@@ -30,8 +30,11 @@ CREATE INDEX idx_accounts_group ON accounts(account_group);
 CREATE INDEX idx_accounts_type ON accounts(type);
 
 -- Migration 003: Create vouchers table
+CREATE SEQUENCE IF NOT EXISTS vouchers_number_seq START 1;
+
 CREATE TABLE IF NOT EXISTS vouchers (
     voucher_id SERIAL PRIMARY KEY,
+    voucher_number INTEGER NOT NULL UNIQUE DEFAULT nextval('vouchers_number_seq'),
     date DATE NOT NULL,
     description TEXT NOT NULL,
     reference VARCHAR(255),
@@ -46,6 +49,7 @@ CREATE TABLE IF NOT EXISTS vouchers (
 CREATE INDEX idx_vouchers_period ON vouchers(period);
 CREATE INDEX idx_vouchers_created_by ON vouchers(created_by);
 CREATE INDEX idx_vouchers_date ON vouchers(date);
+CREATE INDEX idx_vouchers_number ON vouchers(voucher_number);
 
 -- Migration 004: Create line_items table
 CREATE TABLE IF NOT EXISTS line_items (

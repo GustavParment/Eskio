@@ -1,6 +1,41 @@
 package domain
 
-import "time"
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+	"time"
+)
+
+// FlexibleDate handles both date-only (YYYY-MM-DD) and full timestamp formats
+type FlexibleDate struct {
+	time.Time
+}
+
+func (fd *FlexibleDate) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), "\"")
+
+	// Try date-only format first (YYYY-MM-DD)
+	t, err := time.Parse("2006-01-02", s)
+	if err == nil {
+		fd.Time = t
+		return nil
+	}
+
+	// Try RFC3339 format
+	t, err = time.Parse(time.RFC3339, s)
+	if err == nil {
+		fd.Time = t
+		return nil
+	}
+
+	return fmt.Errorf("could not parse date: %s", s)
+}
+
+func (fd FlexibleDate) MarshalJSON() ([]byte, error) {
+	// Always output in RFC3339 format
+	return json.Marshal(fd.Time)
+}
 
 type User struct {
     UserID      int    `json:"user_id" validate:"omitempty,gt=0"`     // Unikt ID
@@ -31,12 +66,24 @@ type LineItem struct {
 }
 
 type Voucher struct {
-    VoucherID   int       `json:"voucher_id"`   // Unikt ID
-    Date        time.Time `json:"date"`         // Datum då händelsen inträffade
-    Description string    `json:"description"`  // Beskrivning av transaktionen
-    Reference   string    `json:"reference"`    // Fakturanummer, kvitto-ID, etc.
-    TotalAmount float64   `json:"total_amount"` // Totalbelopp
-    Period      string    `json:"period"`       // Period (t.ex. "2025-01")
-    CreatedBy   int       `json:"created_by"`   // Foreign Key till UserID
-    Lines       []LineItem `json:"lines"`        // Lista över Verifikatraderna
+    VoucherID     int          `json:"voucher_id"`     // Unikt ID
+    VoucherNumber int          `json:"voucher_number"` // Löpnummer för verifikat (1, 2, 3...)
+    Date          FlexibleDate `json:"date"`           // Datum då händelsen inträffade
+    Description   string       `json:"description"`    // Beskrivning av transaktionen
+    Reference     string       `json:"reference"`      // Fakturanummer, kvitto-ID, etc.
+    TotalAmount   float64      `json:"total_amount"`   // Totalbelopp
+    Period        string       `json:"period"`         // Period (t.ex. "2025-01")
+    CreatedBy     int          `json:"created_by"`     // Foreign Key till UserID
+    Lines         []LineItem   `json:"lines"`          // Lista över Verifikatraderna
+}
+
+type LedgerEntry struct {
+    Date          FlexibleDate `json:"date"`           // Transaction date
+    VoucherID     int          `json:"voucher_id"`     // Voucher ID
+    VoucherNumber int          `json:"voucher_number"` // Voucher number (#1, #2, etc.)
+    Description   string       `json:"description"`    // Transaction description
+    Reference     string       `json:"reference"`      // Invoice/reference number
+    DebitAmount   float64      `json:"debit_amount"`   // Debit amount
+    CreditAmount  float64      `json:"credit_amount"`  // Credit amount
+    Balance       float64      `json:"balance"`        // Running balance (calculated)
 }
