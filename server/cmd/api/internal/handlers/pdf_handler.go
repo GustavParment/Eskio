@@ -39,51 +39,54 @@ func (h *PDFHandler) GenerateVoucherPDF(c *gin.Context) {
 		return
 	}
 
-	// Create PDF
+	// Create PDF with UTF-8 support
 	pdf := fpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 
+	// Set up UTF-8 font translator
+	tr := pdf.UnicodeTranslatorFromDescriptor("cp1252")
+
 	// Header
 	pdf.SetFont("Arial", "B", 18)
-	pdf.Cell(0, 10, "Verifikat")
+	pdf.Cell(0, 10, tr("Verifikat"))
 	pdf.Ln(12)
 
 	// Voucher number and date
 	pdf.SetFont("Arial", "B", 12)
-	pdf.Cell(40, 8, fmt.Sprintf("Verifikat #%d", voucher.VoucherNumber))
+	pdf.Cell(40, 8, tr(fmt.Sprintf("Verifikat #%d", voucher.VoucherNumber)))
 	pdf.Ln(8)
 
 	pdf.SetFont("Arial", "", 10)
-	pdf.Cell(30, 6, "Datum:")
+	pdf.Cell(30, 6, tr("Datum:"))
 	pdf.Cell(60, 6, voucher.Date.Time.Format("2006-01-02"))
 	pdf.Ln(6)
 
-	pdf.Cell(30, 6, "Period:")
+	pdf.Cell(30, 6, tr("Period:"))
 	pdf.Cell(60, 6, voucher.Period)
 	pdf.Ln(6)
 
 	if voucher.Reference != "" {
-		pdf.Cell(30, 6, "Referens:")
-		pdf.Cell(60, 6, voucher.Reference)
+		pdf.Cell(30, 6, tr("Referens:"))
+		pdf.Cell(60, 6, tr(voucher.Reference))
 		pdf.Ln(6)
 	}
 
-	pdf.Cell(30, 6, "Beskrivning:")
-	pdf.MultiCell(150, 6, voucher.Description, "", "", false)
+	pdf.Cell(30, 6, tr("Beskrivning:"))
+	pdf.MultiCell(150, 6, tr(voucher.Description), "", "", false)
 	pdf.Ln(4)
 
 	// Correction info
 	if voucher.CorrectsVoucherID != nil {
 		pdf.SetFont("Arial", "I", 9)
 		pdf.SetTextColor(150, 0, 0)
-		pdf.Cell(0, 6, fmt.Sprintf("Detta verifikat rattar verifikat #%d", *voucher.CorrectsVoucherID))
+		pdf.Cell(0, 6, tr(fmt.Sprintf("Detta verifikat rättar verifikat #%d", *voucher.CorrectsVoucherID)))
 		pdf.Ln(6)
 		pdf.SetTextColor(0, 0, 0)
 	}
 	if voucher.CorrectedByVoucherID != nil {
 		pdf.SetFont("Arial", "I", 9)
 		pdf.SetTextColor(150, 0, 0)
-		pdf.Cell(0, 6, fmt.Sprintf("Detta verifikat har rattats av verifikat #%d", *voucher.CorrectedByVoucherID))
+		pdf.Cell(0, 6, tr(fmt.Sprintf("Detta verifikat har rättats av verifikat #%d", *voucher.CorrectedByVoucherID)))
 		pdf.Ln(6)
 		pdf.SetTextColor(0, 0, 0)
 	}
@@ -93,11 +96,11 @@ func (h *PDFHandler) GenerateVoucherPDF(c *gin.Context) {
 	// Line items table header
 	pdf.SetFont("Arial", "B", 10)
 	pdf.SetFillColor(240, 240, 240)
-	pdf.CellFormat(25, 8, "Konto", "1", 0, "C", true, 0, "")
-	pdf.CellFormat(70, 8, "Kontonamn", "1", 0, "L", true, 0, "")
-	pdf.CellFormat(35, 8, "Debet", "1", 0, "R", true, 0, "")
-	pdf.CellFormat(35, 8, "Kredit", "1", 0, "R", true, 0, "")
-	pdf.CellFormat(20, 8, "Moms", "1", 0, "C", true, 0, "")
+	pdf.CellFormat(25, 8, tr("Konto"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(70, 8, tr("Kontonamn"), "1", 0, "L", true, 0, "")
+	pdf.CellFormat(35, 8, tr("Debet"), "1", 0, "R", true, 0, "")
+	pdf.CellFormat(35, 8, tr("Kredit"), "1", 0, "R", true, 0, "")
+	pdf.CellFormat(20, 8, tr("Moms"), "1", 0, "C", true, 0, "")
 	pdf.Ln(8)
 
 	// Line items
@@ -111,7 +114,7 @@ func (h *PDFHandler) GenerateVoucherPDF(c *gin.Context) {
 		}
 
 		pdf.CellFormat(25, 7, strconv.Itoa(line.AccountNo), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(70, 7, truncateString(accountName, 35), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, 7, tr(truncateString(accountName, 35)), "1", 0, "L", false, 0, "")
 
 		if line.DebitAmount > 0 {
 			pdf.CellFormat(35, 7, formatCurrency(line.DebitAmount), "1", 0, "R", false, 0, "")
@@ -135,7 +138,7 @@ func (h *PDFHandler) GenerateVoucherPDF(c *gin.Context) {
 	// Totals row
 	pdf.SetFont("Arial", "B", 10)
 	pdf.SetFillColor(240, 240, 240)
-	pdf.CellFormat(95, 8, "Summa:", "1", 0, "R", true, 0, "")
+	pdf.CellFormat(95, 8, tr("Summa:"), "1", 0, "R", true, 0, "")
 	pdf.CellFormat(35, 8, formatCurrency(totalDebit), "1", 0, "R", true, 0, "")
 	pdf.CellFormat(35, 8, formatCurrency(totalCredit), "1", 0, "R", true, 0, "")
 	pdf.CellFormat(20, 8, "", "1", 0, "C", true, 0, "")
@@ -144,10 +147,10 @@ func (h *PDFHandler) GenerateVoucherPDF(c *gin.Context) {
 	// Balance check
 	if totalDebit == totalCredit {
 		pdf.SetTextColor(0, 128, 0)
-		pdf.Cell(0, 6, "Verifikatet ar balanserat")
+		pdf.Cell(0, 6, tr("Verifikatet är balanserat"))
 	} else {
 		pdf.SetTextColor(255, 0, 0)
-		pdf.Cell(0, 6, "VARNING: Verifikatet ar INTE balanserat!")
+		pdf.Cell(0, 6, tr("VARNING: Verifikatet är INTE balanserat!"))
 	}
 	pdf.SetTextColor(0, 0, 0)
 
@@ -155,7 +158,7 @@ func (h *PDFHandler) GenerateVoucherPDF(c *gin.Context) {
 	pdf.Ln(20)
 	pdf.SetFont("Arial", "I", 8)
 	pdf.SetTextColor(128, 128, 128)
-	pdf.Cell(0, 5, "Genererad av Eskio Bokforingssystem")
+	pdf.Cell(0, 5, tr("Genererad av Eskio Bokföringssystem"))
 
 	// Output PDF to buffer
 	var buf bytes.Buffer

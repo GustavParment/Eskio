@@ -67,6 +67,7 @@ func SetupRoutes(
 			vouchers.GET("/user/:userId", voucherHandler.GetVouchersByCreatedBy)
 			vouchers.GET("/:id/validate", voucherHandler.ValidateVoucherBalance)
 			vouchers.POST("/:id/correct", voucherHandler.CreateCorrectionVoucher)
+			vouchers.POST("/:id/correct-with-changes", voucherHandler.CreateCorrectionWithChanges)
 			vouchers.GET("/:id/pdf", pdfHandler.GenerateVoucherPDF)
 			// Only Admin can update or delete vouchers
 			vouchers.PUT("/:id", middleware.RequireRole("Admin"), voucherHandler.UpdateVoucher)

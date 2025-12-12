@@ -189,3 +189,64 @@ func (h *VoucherHandler) CreateCorrectionVoucher(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, correctionVoucher)
 }
+
+// CreateCorrectionWithChanges handles POST /vouchers/:id/correct-with-changes
+func (h *VoucherHandler) CreateCorrectionWithChanges(c *gin.Context) {
+	idParam := c.Param("id")
+	voucherID, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid voucher ID"})
+		return
+	}
+
+	// Get request body with new voucher data
+	var req struct {
+		UserID int `json:"user_id" binding:"required"`
+		NewVoucher struct {
+			Date        string  `json:"date"`
+			Description string  `json:"description"`
+			Reference   string  `json:"reference"`
+			TotalAmount float64 `json:"total_amount"`
+			Period      string  `json:"period"`
+			CreatedBy   int     `json:"created_by"`
+		} `json:"new_voucher" binding:"required"`
+		NewLineItems []struct {
+			AccountNo    int     `json:"account_no"`
+			DebitAmount  float64 `json:"debit_amount"`
+			CreditAmount float64 `json:"credit_amount"`
+			TaxCode      int     `json:"tax_code"`
+		} `json:"new_line_items" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Convert line items to domain model
+	newLineItems := make([]domain.LineItem, len(req.NewLineItems))
+	for i, item := range req.NewLineItems {
+		newLineItems[i] = domain.LineItem{
+			AccountNo:    item.AccountNo,
+			DebitAmount:  item.DebitAmount,
+			CreditAmount: item.CreditAmount,
+			TaxCode:      item.TaxCode,
+		}
+	}
+
+	correctionVoucher, err := h.voucherService.CreateCorrectionWithChanges(
+		voucherID,
+		req.UserID,
+		req.NewVoucher.Date,
+		req.NewVoucher.Description,
+		req.NewVoucher.Reference,
+		req.NewVoucher.Period,
+		newLineItems,
+	)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, correctionVoucher)
+}

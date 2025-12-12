@@ -5,6 +5,7 @@ import (
 	"cmd/api/internal/repository"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -261,6 +262,109 @@ func (s *VoucherService) CreateCorrectionVoucher(originalVoucherID int, userID i
 		err = s.lineItemRepository.CreateLineItem(reversedItem)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create correction line item: %w", err)
+		}
+	}
+
+	// Mark the original voucher as corrected
+	err = s.repository.MarkVoucherAsCorrected(originalVoucherID, correctionVoucher.VoucherID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to mark original voucher as corrected: %w", err)
+	}
+
+	return correctionVoucher, nil
+}
+
+// CreateCorrectionWithChanges creates a correction voucher with custom changes
+func (s *VoucherService) CreateCorrectionWithChanges(
+	originalVoucherID int,
+	userID int,
+	newDate string,
+	newDescription string,
+	newReference string,
+	newPeriod string,
+	newLineItems []domain.LineItem,
+) (*domain.Voucher, error) {
+	if originalVoucherID <= 0 {
+		return nil, errors.New("invalid voucher ID")
+	}
+	if userID <= 0 {
+		return nil, errors.New("invalid user ID")
+	}
+
+	// Get the original voucher
+	originalVoucher, err := s.repository.GetVoucherByID(originalVoucherID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get original voucher: %w", err)
+	}
+
+	// Check if voucher is already corrected
+	if originalVoucher.CorrectedByVoucherID != nil {
+		return nil, errors.New("voucher has already been corrected")
+	}
+
+	// Get original line items
+	originalLineItems, err := s.lineItemRepository.GetLineItemsByVoucherID(originalVoucherID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get original line items: %w", err)
+	}
+
+	// Calculate total from new line items
+	var newTotal float64
+	for _, item := range newLineItems {
+		if item.DebitAmount > 0 {
+			newTotal += item.DebitAmount
+		}
+	}
+
+	// Parse new date
+	parsedDate, err := time.Parse("2006-01-02", newDate)
+	if err != nil {
+		return nil, fmt.Errorf("invalid date format: %w", err)
+	}
+
+	// Create correction voucher
+	correctionVoucher := &domain.Voucher{
+		Date:        domain.FlexibleDate{Time: parsedDate},
+		Description: fmt.Sprintf("Rättelse av verifikat #%d: %s", originalVoucher.VoucherNumber, newDescription),
+		Reference:   newReference,
+		TotalAmount: newTotal,
+		Period:      newPeriod,
+		CreatedBy:   userID,
+	}
+
+	// Create the correction voucher in database
+	err = s.repository.CreateCorrectionVoucher(correctionVoucher, originalVoucherID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create correction voucher: %w", err)
+	}
+
+	// First: Create reversed line items (to cancel original)
+	for _, item := range originalLineItems {
+		reversedItem := &domain.LineItem{
+			VoucherID:    correctionVoucher.VoucherID,
+			AccountNo:    item.AccountNo,
+			DebitAmount:  item.CreditAmount,  // Swap
+			CreditAmount: item.DebitAmount,   // Swap
+			TaxCode:      item.TaxCode,
+		}
+		err = s.lineItemRepository.CreateLineItem(reversedItem)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create reversal line item: %w", err)
+		}
+	}
+
+	// Second: Create new line items (the corrected values)
+	for _, item := range newLineItems {
+		newItem := &domain.LineItem{
+			VoucherID:    correctionVoucher.VoucherID,
+			AccountNo:    item.AccountNo,
+			DebitAmount:  item.DebitAmount,
+			CreditAmount: item.CreditAmount,
+			TaxCode:      item.TaxCode,
+		}
+		err = s.lineItemRepository.CreateLineItem(newItem)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create new line item: %w", err)
 		}
 	}
 
