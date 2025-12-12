@@ -150,13 +150,12 @@ export default function VoucherDetailPage() {
                 Ladda ner PDF
               </button>
               {!isCorrected && !isCorrection && (
-                <button
-                  onClick={handleCreateCorrection}
-                  disabled={actionLoading}
-                  className="px-4 py-2 border border-orange-500 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors font-medium disabled:opacity-50"
+                <Link
+                  href={`/vouchers/${voucher.voucher_id}/correct`}
+                  className="px-4 py-2 border border-orange-500 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors font-medium"
                 >
                   Skapa rättelse
-                </button>
+                </Link>
               )}
               {isAdmin && (
                 <Link

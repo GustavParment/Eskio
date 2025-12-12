@@ -15,19 +15,26 @@ export default function AccountLedgerPage() {
   const [account, setAccount] = useState<Account | null>(null);
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  });
+  const [period, setPeriod] = useState(""); // Empty string = show all periods
 
   // Generate period options (last 12 months)
-  const periodOptions = Array.from({ length: 12 }, (_, i) => {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    return `${year}-${month}`;
-  });
+  const periodOptions = [
+    { value: "", label: "Alla perioder" }, // Default option
+    ...Array.from({ length: 12 }, (_, i) => {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const periodValue = `${year}-${month}`;
+      return {
+        value: periodValue,
+        label: new Date(periodValue + "-01").toLocaleDateString("sv-SE", {
+          year: "numeric",
+          month: "long",
+        }),
+      };
+    }),
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -114,12 +121,9 @@ export default function AccountLedgerPage() {
             onChange={(e) => setPeriod(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
           >
-            {periodOptions.map((p) => (
-              <option key={p} value={p}>
-                {new Date(p + "-01").toLocaleDateString("sv-SE", {
-                  year: "numeric",
-                  month: "long",
-                })}
+            {periodOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>
@@ -238,10 +242,13 @@ export default function AccountLedgerPage() {
           <div>
             <span className="text-gray-600">Period:</span>{" "}
             <span className="font-medium text-gray-900">
-              {new Date(period + "-01").toLocaleDateString("sv-SE", {
-                year: "numeric",
-                month: "long",
-              })}
+              {period === ""
+                ? "Alla perioder"
+                : new Date(period + "-01").toLocaleDateString("sv-SE", {
+                    year: "numeric",
+                    month: "long",
+                  })
+              }
             </span>
           </div>
         </div>
