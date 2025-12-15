@@ -274,7 +274,9 @@ func (s *VoucherService) CreateCorrectionVoucher(originalVoucherID int, userID i
 	return correctionVoucher, nil
 }
 
-// CreateCorrectionWithChanges creates a correction voucher with custom changes
+// CreateCorrectionWithChanges creates TWO separate correction vouchers:
+// 1. Reversal voucher (cancels the original)
+// 2. New corrected voucher (with the updated values)
 func (s *VoucherService) CreateCorrectionWithChanges(
 	originalVoucherID int,
 	userID int,
@@ -322,26 +324,26 @@ func (s *VoucherService) CreateCorrectionWithChanges(
 		return nil, fmt.Errorf("invalid date format: %w", err)
 	}
 
-	// Create correction voucher
-	correctionVoucher := &domain.Voucher{
+	// STEP 1: Create REVERSAL voucher (cancels the original)
+	reversalVoucher := &domain.Voucher{
 		Date:        domain.FlexibleDate{Time: parsedDate},
-		Description: fmt.Sprintf("Rättelse av verifikat #%d: %s", originalVoucher.VoucherNumber, newDescription),
-		Reference:   newReference,
-		TotalAmount: newTotal,
+		Description: fmt.Sprintf("Reversering av verifikat #%d: %s", originalVoucher.VoucherNumber, originalVoucher.Description),
+		Reference:   originalVoucher.Reference,
+		TotalAmount: originalVoucher.TotalAmount,
 		Period:      newPeriod,
 		CreatedBy:   userID,
 	}
 
-	// Create the correction voucher in database
-	err = s.repository.CreateCorrectionVoucher(correctionVoucher, originalVoucherID)
+	// Create the reversal voucher in database
+	err = s.repository.CreateCorrectionVoucher(reversalVoucher, originalVoucherID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create correction voucher: %w", err)
+		return nil, fmt.Errorf("failed to create reversal voucher: %w", err)
 	}
 
-	// First: Create reversed line items (to cancel original)
+	// Create reversed line items (swap debit and credit)
 	for _, item := range originalLineItems {
 		reversedItem := &domain.LineItem{
-			VoucherID:    correctionVoucher.VoucherID,
+			VoucherID:    reversalVoucher.VoucherID,
 			AccountNo:    item.AccountNo,
 			DebitAmount:  item.CreditAmount,  // Swap
 			CreditAmount: item.DebitAmount,   // Swap
@@ -353,10 +355,26 @@ func (s *VoucherService) CreateCorrectionWithChanges(
 		}
 	}
 
-	// Second: Create new line items (the corrected values)
+	// STEP 2: Create NEW CORRECTED voucher (with updated values)
+	newVoucher := &domain.Voucher{
+		Date:        domain.FlexibleDate{Time: parsedDate},
+		Description: newDescription,
+		Reference:   newReference,
+		TotalAmount: newTotal,
+		Period:      newPeriod,
+		CreatedBy:   userID,
+	}
+
+	// Create the new voucher in database
+	err = s.repository.CreateVoucher(newVoucher)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new corrected voucher: %w", err)
+	}
+
+	// Create new line items (the corrected values)
 	for _, item := range newLineItems {
 		newItem := &domain.LineItem{
-			VoucherID:    correctionVoucher.VoucherID,
+			VoucherID:    newVoucher.VoucherID,
 			AccountNo:    item.AccountNo,
 			DebitAmount:  item.DebitAmount,
 			CreditAmount: item.CreditAmount,
@@ -368,11 +386,12 @@ func (s *VoucherService) CreateCorrectionWithChanges(
 		}
 	}
 
-	// Mark the original voucher as corrected
-	err = s.repository.MarkVoucherAsCorrected(originalVoucherID, correctionVoucher.VoucherID)
+	// Mark the original voucher as corrected (link to reversal voucher)
+	err = s.repository.MarkVoucherAsCorrected(originalVoucherID, reversalVoucher.VoucherID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to mark original voucher as corrected: %w", err)
 	}
 
-	return correctionVoucher, nil
+	// Return the new corrected voucher (the user will be redirected here)
+	return newVoucher, nil
 }

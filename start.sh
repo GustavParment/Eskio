@@ -14,7 +14,7 @@ if docker ps | grep -q eskio-postgres; then
     echo "✅ PostgreSQL container is already running"
 else
     echo "🔄 Starting PostgreSQL container..."
-    cd "$SCRIPT_DIR/server" && docker-compose up -d
+    cd "$SCRIPT_DIR/server" && docker compose up -d
     echo "⏳ Waiting for PostgreSQL to be ready..."
     sleep 3
 fi
