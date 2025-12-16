@@ -13,6 +13,7 @@ type VoucherRepository interface {
 	GetAllVouchers() ([]*domain.Voucher, error)
 	GetVouchersByPeriod(period string) ([]*domain.Voucher, error)
 	GetVouchersByCreatedBy(userID int) ([]*domain.Voucher, error)
+	GetAllPeriods() ([]string, error)
 	UpdateVoucher(voucher *domain.Voucher) error
 	DeleteVoucher(voucherID int) error
 	MarkVoucherAsCorrected(voucherID int, correctedByID int) error
@@ -220,6 +221,35 @@ func (r *voucherRepository) GetVouchersByCreatedBy(userID int) ([]*domain.Vouche
 	}
 
 	return vouchers, nil
+}
+
+func (r *voucherRepository) GetAllPeriods() ([]string, error) {
+	query := `
+		SELECT DISTINCT period
+		FROM vouchers
+		WHERE period IS NOT NULL AND period != ''
+		ORDER BY period DESC
+	`
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get periods: %w", err)
+	}
+	defer rows.Close()
+
+	periods := make([]string, 0)
+	for rows.Next() {
+		var period string
+		if err := rows.Scan(&period); err != nil {
+			return nil, fmt.Errorf("failed to scan period: %w", err)
+		}
+		periods = append(periods, period)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating periods: %w", err)
+	}
+
+	return periods, nil
 }
 
 func (r *voucherRepository) UpdateVoucher(voucher *domain.Voucher) error {

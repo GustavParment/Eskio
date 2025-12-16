@@ -179,6 +179,7 @@ func (r *accountRepository) GetLedger(accountNo int, period string) ([]*domain.L
 		INNER JOIN vouchers v ON l.voucher_id = v.voucher_id
 		WHERE l.account_no = $1
 			AND ($2 = '' OR v.period = $2)
+			AND v.corrected_by_voucher_id IS NULL
 		ORDER BY v.date ASC, v.voucher_number ASC
 	`
 

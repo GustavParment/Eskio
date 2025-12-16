@@ -96,6 +96,17 @@ func (h *VoucherHandler) GetVouchersByCreatedBy(c *gin.Context) {
 	c.JSON(http.StatusOK, vouchers)
 }
 
+// GetAllPeriods handles GET /vouchers/periods
+func (h *VoucherHandler) GetAllPeriods(c *gin.Context) {
+	periods, err := h.voucherService.GetAllPeriods()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, periods)
+}
+
 // UpdateVoucher handles PUT /vouchers/:id
 func (h *VoucherHandler) UpdateVoucher(c *gin.Context) {
 	idParam := c.Param("id")

@@ -62,6 +62,7 @@ func SetupRoutes(
 		{
 			vouchers.POST("", voucherHandler.CreateVoucher)
 			vouchers.GET("", voucherHandler.GetAllVouchers)
+			vouchers.GET("/periods", voucherHandler.GetAllPeriods)
 			vouchers.GET("/:id", voucherHandler.GetVoucherByID)
 			vouchers.GET("/period/:period", voucherHandler.GetVouchersByPeriod)
 			vouchers.GET("/user/:userId", voucherHandler.GetVouchersByCreatedBy)
