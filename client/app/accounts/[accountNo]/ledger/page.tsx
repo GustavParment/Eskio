@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { accountsApi } from "@/lib/api/accounts";
+import { vouchersApi } from "@/lib/api/vouchers";
 import { Account, LedgerEntry } from "@/types";
 import Link from "next/link";
 
@@ -16,26 +17,22 @@ export default function AccountLedgerPage() {
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState(""); // Empty string = show all periods
+  const [availablePeriods, setAvailablePeriods] = useState<string[]>([]);
 
-  // Generate period options (last 12 months)
-  const periodOptions = [
-    { value: "", label: "Alla perioder" }, // Default option
-    ...Array.from({ length: 12 }, (_, i) => {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const periodValue = `${year}-${month}`;
-      return {
-        value: periodValue,
-        label: new Date(periodValue + "-01").toLocaleDateString("sv-SE", {
-          year: "numeric",
-          month: "long",
-        }),
-      };
-    }),
-  ];
+  // Fetch available periods on mount
+  useEffect(() => {
+    const fetchPeriods = async () => {
+      try {
+        const periods = await vouchersApi.getAllPeriods();
+        setAvailablePeriods(periods);
+      } catch (error) {
+        console.error("Failed to fetch periods:", error);
+      }
+    };
+    fetchPeriods();
+  }, []);
 
+  // Fetch ledger data when account or period changes
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -121,9 +118,13 @@ export default function AccountLedgerPage() {
             onChange={(e) => setPeriod(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
           >
-            {periodOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+            <option value="">Alla perioder</option>
+            {availablePeriods.map((p) => (
+              <option key={p} value={p}>
+                {new Date(p + "-01").toLocaleDateString("sv-SE", {
+                  year: "numeric",
+                  month: "long",
+                })}
               </option>
             ))}
           </select>

@@ -19,6 +19,8 @@ export default function VoucherDetailPage() {
   const [voucher, setVoucher] = useState<Voucher | null>(null);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [accounts, setAccounts] = useState<Record<number, Account>>({});
+  const [correctedByVoucher, setCorrectedByVoucher] = useState<Voucher | null>(null);
+  const [correctsVoucher, setCorrectsVoucher] = useState<Voucher | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState("");
@@ -45,6 +47,16 @@ export default function VoucherDetailPage() {
           accountMap[acc.account_no] = acc;
         });
         setAccounts(accountMap);
+
+        // Fetch related correction vouchers if they exist
+        if (voucherData.corrected_by_voucher_id) {
+          const correctedBy = await vouchersApi.getById(voucherData.corrected_by_voucher_id);
+          setCorrectedByVoucher(correctedBy);
+        }
+        if (voucherData.corrects_voucher_id) {
+          const corrects = await vouchersApi.getById(voucherData.corrects_voucher_id);
+          setCorrectsVoucher(corrects);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load voucher");
       } finally {
@@ -170,29 +182,29 @@ export default function VoucherDetailPage() {
         </div>
 
         {/* Correction warnings */}
-        {isCorrected && (
+        {isCorrected && correctedByVoucher && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-700 font-medium">
               Detta verifikat har rättats av{" "}
               <Link
-                href={`/vouchers/${voucher.corrected_by_voucher_id}`}
+                href={`/vouchers/${correctedByVoucher.voucher_id}`}
                 className="underline hover:text-red-800"
               >
-                verifikat #{voucher.corrected_by_voucher_id}
+                verifikat #{correctedByVoucher.voucher_number}
               </Link>
             </p>
           </div>
         )}
 
-        {isCorrection && (
+        {isCorrection && correctsVoucher && (
           <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <p className="text-orange-700 font-medium">
               Detta är ett rättelseverifikat för{" "}
               <Link
-                href={`/vouchers/${voucher.corrects_voucher_id}`}
+                href={`/vouchers/${correctsVoucher.voucher_id}`}
                 className="underline hover:text-orange-800"
               >
-                verifikat #{voucher.corrects_voucher_id}
+                verifikat #{correctsVoucher.voucher_number}
               </Link>
             </p>
           </div>

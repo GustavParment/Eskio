@@ -37,7 +37,9 @@ export default function DashboardPage() {
         ]);
         // Handle null/undefined responses by defaulting to empty arrays
         const vouchersArray = Array.isArray(vouchersData) ? vouchersData : [];
-        setVouchers(vouchersArray.slice(0, 5)); // Latest 5 vouchers
+        // Filter out corrected vouchers and take latest 5
+        const activeVouchers = vouchersArray.filter(v => !v.corrected_by_voucher_id);
+        setVouchers(activeVouchers.slice(0, 5)); // Latest 5 active vouchers
         setAccounts(Array.isArray(accountsData) ? accountsData : []);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);

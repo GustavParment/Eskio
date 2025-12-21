@@ -18,6 +18,10 @@ export const vouchersApi = {
     return apiClient.get<Voucher[]>(`/vouchers/user/${userId}`);
   },
 
+  getAllPeriods: async (): Promise<string[]> => {
+    return apiClient.get<string[]>("/vouchers/periods");
+  },
+
   validate: async (id: number): Promise<ValidationResponse> => {
     return apiClient.get<ValidationResponse>(`/vouchers/${id}/validate`);
   },

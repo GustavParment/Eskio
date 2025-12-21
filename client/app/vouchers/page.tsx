@@ -16,6 +16,20 @@ export default function VouchersPage() {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
+  const [availablePeriods, setAvailablePeriods] = useState<string[]>([]);
+
+  // Fetch available periods on mount
+  useEffect(() => {
+    const fetchPeriods = async () => {
+      try {
+        const periods = await vouchersApi.getAllPeriods();
+        setAvailablePeriods(periods);
+      } catch (error) {
+        console.error("Failed to fetch periods:", error);
+      }
+    };
+    fetchPeriods();
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -60,14 +74,6 @@ export default function VouchersPage() {
     );
   });
 
-  // Generate period options (last 12 months)
-  const periodOptions = Array.from({ length: 12 }, (_, i) => {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    return `${year}-${month}`;
-  });
 
   if (loading) {
     return (
@@ -122,7 +128,7 @@ export default function VouchersPage() {
               onChange={(e) => setCurrentPeriod(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             >
-              {periodOptions.map((period) => (
+              {availablePeriods.map((period) => (
                 <option key={period} value={period}>
                   {new Date(period + "-01").toLocaleDateString("sv-SE", {
                     year: "numeric",
@@ -163,9 +169,15 @@ export default function VouchersPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredVouchers.map((voucher) => (
-                  <tr key={voucher.voucher_id} className="hover:bg-gray-50">
+                  <tr
+                    key={voucher.voucher_id}
+                    className={`hover:bg-gray-50 ${voucher.corrected_by_voucher_id ? 'bg-red-50 opacity-60' : ''}`}
+                  >
                     <td className="py-4 px-6 text-sm font-semibold text-blue-600">
                       #{voucher.voucher_number}
+                      {voucher.corrected_by_voucher_id && (
+                        <span className="ml-2 text-xs text-red-600 font-normal">(rättad)</span>
+                      )}
                     </td>
                     <td className="py-4 px-6 text-sm text-gray-600">
                       {new Date(voucher.date).toLocaleDateString("sv-SE")}
@@ -209,6 +221,7 @@ export default function VouchersPage() {
         <div className="font-medium">
           Total summa:{" "}
           {filteredVouchers
+            .filter((v) => !v.corrected_by_voucher_id) // Exclude corrected vouchers
             .reduce((sum, v) => sum + v.total_amount, 0)
             .toLocaleString("sv-SE", {
               minimumFractionDigits: 2,
