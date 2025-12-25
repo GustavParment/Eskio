@@ -89,3 +89,21 @@ type LedgerEntry struct {
     CreditAmount  float64      `json:"credit_amount"`  // Credit amount
     Balance       float64      `json:"balance"`        // Running balance (calculated)
 }
+
+type IncomeStatementEntry struct {
+    AccountNo   int     `json:"account_no"`   // Account number
+    AccountName string  `json:"account_name"` // Account name
+    Balance     float64 `json:"balance"`      // Account balance for period
+}
+
+type IncomeStatement struct {
+    Period struct {
+        FromDate string `json:"from_date"` // Start date (YYYY-MM-DD)
+        ToDate   string `json:"to_date"`   // End date (YYYY-MM-DD)
+    } `json:"period"`
+    Income        []IncomeStatementEntry `json:"income"`         // Revenue accounts (3000-3999)
+    Expenses      []IncomeStatementEntry `json:"expenses"`       // Expense accounts (4000-8999)
+    TotalIncome   float64                `json:"total_income"`   // Sum of all income
+    TotalExpenses float64                `json:"total_expenses"` // Sum of all expenses
+    NetResult     float64                `json:"net_result"`     // Total income - Total expenses
+}

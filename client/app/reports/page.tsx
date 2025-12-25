@@ -10,7 +10,7 @@ export default function ReportsPage() {
       description: "Visa företagets intäkter och kostnader",
       icon: "📊",
       color: "bg-blue-500",
-      href: null,
+      href: "/reports/income-statement",
     },
     {
       name: "Balansräkning",

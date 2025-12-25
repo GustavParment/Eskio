@@ -15,6 +15,7 @@ func SetupRoutes(
 	voucherHandler *handlers.VoucherHandler,
 	authHandler *handlers.AuthHandler,
 	pdfHandler *handlers.PDFHandler,
+	reportHandler *handlers.ReportHandler,
 	authMiddleware gin.HandlerFunc) {
 
 	v1 := router.Group("/api/v1")
@@ -73,6 +74,11 @@ func SetupRoutes(
 			// Only Admin can update or delete vouchers
 			vouchers.PUT("/:id", middleware.RequireRole("Admin"), voucherHandler.UpdateVoucher)
 			vouchers.DELETE("/:id", middleware.RequireRole("Admin"), voucherHandler.DeleteVoucher)
+		}
+
+		reports := v1.Group("/reports", authMiddleware)
+		{
+			reports.GET("/income-statement", reportHandler.GetIncomeStatement)
 		}
 	}
 }
